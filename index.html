@@ -3,16 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#5b3a29" />
+    <meta name="theme-color" content="#7b5236" />
     <link rel="manifest" href="manifest.json" />
     <title>BookStand</title>
     <style>
       :root{
-        --wood-1:#6b4a34;
-        --wood-2:#563726;
-        --wood-3:#452b1f;
-        --shelf-shadow: rgba(0,0,0,.22);
-        --book-text:#1f2937;
+        --book-w: 32px;
+        --book-h: 148px;
+        --gap: 10px;
+        --side-pad: 10px;
+
+        --wall-1:#ddd6cc;
+        --wall-2:#cfc6ba;
+
+        --wood-1:#9b6b46;
+        --wood-2:#845737;
+        --wood-3:#734a30;
+        --wood-dark:#5f3d28;
+
+        --ink:#2b3445;
       }
 
       *{ box-sizing:border-box; }
@@ -26,84 +35,134 @@
           system-ui,
           -apple-system,
           sans-serif;
-        color:#f8fafc;
+        color:#2b2b2b;
         background:
-          radial-gradient(700px 300px at 50% -10%, rgba(255,255,255,.08), transparent 60%),
-          linear-gradient(180deg, var(--wood-1), var(--wood-2) 55%, var(--wood-3));
+          radial-gradient(1200px 500px at 50% -20%, rgba(255,255,255,.18), transparent 60%),
+          linear-gradient(180deg, var(--wall-1), var(--wall-2));
       }
 
       .wrap{
-        min-height: 100dvh;
-        display: grid;
-        place-items: center;
-        padding: 10px;
-        max-width: none;
+        min-height:100dvh;
+        display:grid;
+        place-items:center;
+        padding:12px;
       }
 
       .title{ display:none; }
 
       .bookshelf{
-        width: min(92vw, 420px);
-        padding: 12px;
-        border-radius: 16px;
-        background: rgba(255,255,255,.08);
-        border: 1px solid rgba(255,255,255,.2);
-        box-shadow: 0 12px 28px rgba(0,0,0,.25);
+        width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
+        max-width:92vw;
+        padding:12px 10px 10px;
+        border-radius:2px;
+        position:relative;
+        background: linear-gradient(180deg, var(--wood-1), var(--wood-2) 52%, var(--wood-3));
+        border:1px solid var(--wood-dark);
+        box-shadow:
+          0 8px 18px rgba(0,0,0,.28),
+          0 1px 0 rgba(255,255,255,.14) inset,
+          0 -1px 0 rgba(0,0,0,.16) inset;
+      }
+
+      .bookshelf::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        border-radius:2px;
+        opacity:.35;
+        background:
+          repeating-linear-gradient(
+            6deg,
+            rgba(255,255,255,.05) 0 2px,
+            rgba(0,0,0,.04) 2px 4px,
+            rgba(255,255,255,.02) 4px 7px
+          );
+      }
+
+      .bookshelf::after{
+        content:"";
+        position:absolute;
+        inset:6px;
+        border:1px solid rgba(255,255,255,.10);
+        box-shadow:0 0 0 1px rgba(0,0,0,.18) inset;
+        pointer-events:none;
+        border-radius:1px;
       }
 
       .shelf-row{
-        position: relative;
-        overflow: visible;
-        padding: 10px 12px 18px;
-        margin: 0 0 10px;
-        border-radius: 12px;
-        background: rgba(255,255,255,.04);
+        position:relative;
+        overflow:visible;
+        padding:8px var(--side-pad) 14px;
+        margin:0 0 8px;
+        background:transparent;
       }
       .shelf-row:last-child{ margin-bottom:0; }
 
       .book-list{
-        position: relative;
-        z-index: 2;
+        position:relative;
+        z-index:2;
         display:flex;
         justify-content:center;
         align-items:flex-end;
-        gap:7px;
+        gap:var(--gap);
         flex-wrap:nowrap;
       }
 
-.book{
-  width: 32px;
-  height: 144px;
-}
-      .book:active{
-        transform: translateY(1px) scale(.995);
-        filter: brightness(.98);
+      .book{
+        width:var(--book-w);
+        height:var(--book-h);
+        flex:0 0 auto;
+        border:none;
+        cursor:pointer;
+        position:relative;
+        overflow:hidden;
+        padding:8px 4px 6px;
+        border-radius:3px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        transition:transform .08s ease, filter .12s ease;
+        box-shadow:
+          0 1px 0 rgba(255,255,255,.58) inset,
+          1px 2px 0 rgba(0,0,0,.16);
       }
-
-      .book::before,
-      .book::after{
-        content:none !important;
+      .book:active{
+        transform:translateY(1px) scale(.995);
+        filter:brightness(.98);
       }
 
       .book.empty{
-        background: linear-gradient(90deg, #f2f4f7 0 22%, #ffffff 22% 100%);
-        box-shadow:
-          0 1px 0 rgba(255,255,255,.5) inset,
-          1px 2px 0 rgba(0,0,0,.16);
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.45) 0 22%, transparent 22% 100%),
+          linear-gradient(105deg, #ffffff 0%, #f3f5f8 55%, #eef1f5 100%);
       }
 
       .book.filled{
         background:
-          linear-gradient(90deg, rgba(255,255,255,.35) 0 22%, transparent 22% 100%),
-          linear-gradient(180deg, #f8fafc, #e6e9ee);
+          linear-gradient(90deg, rgba(255,255,255,.42) 0 22%, transparent 22% 100%),
+          linear-gradient(105deg, #fdfefe 0%, #eef2f7 52%, #e6ebf2 100%);
+      }
+
+      .book.filled::after{
+        content:"";
+        position:absolute;
+        left:50%;
+        top:8px;
+        transform:translateX(-50%);
+        width:62%;
+        height:8px;
+        border-radius:999px;
+        background:linear-gradient(180deg, #ead08a, #c8a04e);
         box-shadow:
           0 1px 0 rgba(255,255,255,.5) inset,
-          1px 2px 0 rgba(0,0,0,.16);
+          0 1px 2px rgba(0,0,0,.16);
+        pointer-events:none;
       }
 
       .book-title{
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
+        writing-mode:vertical-rl;
+        text-orientation:mixed;
         height:auto;
         width:auto;
         max-height:92%;
@@ -111,11 +170,12 @@
         padding:0;
         overflow:hidden;
         text-align:center;
-        color:var(--book-text);
-        font-size:11px;
+        color:var(--ink);
+        font-size:10.5px;
         line-height:1.2;
-        letter-spacing:.02em;
+        letter-spacing:.04em;
         user-select:none;
+        text-shadow:0 1px 0 rgba(255,255,255,.55);
         font-family:
           "Hiragino Mincho ProN",
           "Yu Mincho",
@@ -124,10 +184,20 @@
       }
       .book.empty .book-title{ color:transparent; }
 
-.plank{
-  height: 8px;
-  border-radius: 5px;
-}
+      .plank{
+        z-index:1;
+        pointer-events:none;
+        position:absolute;
+        left:6px; right:6px; bottom:0;
+        height:10px;
+        border-radius:1px;
+        background:linear-gradient(180deg, #a5724d 0%, #86593b 60%, #6f4931 100%);
+        border-top:1px solid rgba(255,255,255,.22);
+        border-bottom:1px solid rgba(0,0,0,.28);
+        box-shadow:
+          0 1px 2px rgba(0,0,0,.22),
+          0 -1px 1px rgba(0,0,0,.12) inset;
+      }
 
       dialog{
         width:min(460px, 92vw);
@@ -135,9 +205,9 @@
         border-radius:14px;
         padding:0;
         overflow:hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,.35);
+        box-shadow:0 20px 60px rgba(0,0,0,.35);
       }
-      dialog::backdrop{ background: rgba(0,0,0,.45); }
+      dialog::backdrop{ background:rgba(0,0,0,.45); }
 
       .modal{
         background:#111827;
@@ -167,7 +237,7 @@
       input:focus, textarea:focus{
         outline:none;
         border-color:#93c5fd;
-        box-shadow: 0 0 0 3px rgba(147,197,253,.25);
+        box-shadow:0 0 0 3px rgba(147,197,253,.25);
       }
 
       textarea{
@@ -193,363 +263,6 @@
       .btn.sub{ background:#374151; color:#fff; }
       .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
       .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
-      /* ===== かわいい + 格調高い装飾 ===== */
-
-/* 全体を少し上品な色味に */
-:root{
-  --gold-1:#e7c97a;
-  --gold-2:#c9a44e;
-  --gold-shadow:rgba(80,50,10,.28);
-}
-
-/* 本棚フレームを小さく上品に */
-.bookshelf{
-  width:min(94vw, 360px);
-  padding:12px 12px 10px;
-  border-radius:18px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:
-    0 14px 30px rgba(0,0,0,.25),
-    0 1px 0 rgba(255,255,255,.35) inset;
-  position:relative;
-}
-
-/* フレーム内側の金ライン */
-.bookshelf::before{
-  content:"";
-  position:absolute;
-  inset:7px;
-  border-radius:13px;
-  pointer-events:none;
-  border:1px solid rgba(231,201,122,.45);
-  box-shadow: 0 0 0 1px rgba(90,60,20,.08) inset;
-}
-
-/* 上下に控えめな飾り罫 */
-.bookshelf::after{
-  content:"❦";
-  position:absolute;
-  left:50%;
-  top:4px;
-  transform:translateX(-50%);
-  font-size:12px;
-  color:rgba(231,201,122,.9);
-  text-shadow:0 1px 0 var(--gold-shadow);
-  pointer-events:none;
-}
-
-/* 段を詰めて可愛く */
-.shelf-row{
-  padding:9px 8px 14px;
-  margin:0 0 8px;
-  border-radius:12px;
-  background:rgba(255,255,255,.03);
-}
-
-/* 本同士の間隔 */
-.book-list{
-  gap:10px;
-}
-
-/* 本をほんの少し細身へ */
-.book{
-  width:32px;
-  height:144px;
-  border-radius:9px 9px 5px 5px;
-}
-
-/* 背表紙の上部に金箔ラベル */
-.book.filled{
-  position:relative;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.36) 0 22%, transparent 22% 100%),
-    linear-gradient(180deg, #fbfcfe, #e9edf3);
-}
-.book.filled::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:8px;
-  transform:translateX(-50%);
-  width:62%;
-  height:10px;
-  border-radius:999px;
-  background:linear-gradient(180deg, var(--gold-1), var(--gold-2));
-  box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 1px 2px rgba(0,0,0,.18);
-}
-
-/* タイトル文字を少し格調高く */
-.book-title{
-  font-size:10.5px;
-  letter-spacing:.04em;
-  color:#2b3445;
-  text-shadow:0 1px 0 rgba(255,255,255,.55);
-  font-family:
-    "Hiragino Mincho ProN",
-    "Yu Mincho",
-    "Noto Serif JP",
-    serif;
-}
-
-/* 棚板を華奢に */
-.plank{
-  height:8px;
-  border-radius:5px;
-  background: linear-gradient(180deg, #9a6a49, #744c35 68%, #5b3b2b);
-  box-shadow: 0 1px 4px rgba(0,0,0,.18) inset;
-}
-      /* ===== Rococo Silk Theme ===== */
-:root{
-  --bg-rose:#5b3a4a;
-  --bg-plum:#4a2f3f;
-  --bg-deep:#382534;
-
-  --panel-1:rgba(255,245,250,.20);
-  --panel-2:rgba(255,240,248,.10);
-
-  --gold-1:#f3d98a;
-  --gold-2:#d8b45e;
-  --gold-3:#b88d3c;
-
-  --silk-1:#fff9fc;
-  --silk-2:#f6ecf3;
-  --silk-3:#eadce7;
-
-  --ink:#3a2c38;
-}
-
-body{
-  background:
-    radial-gradient(900px 360px at 50% -10%, rgba(255,230,245,.16), transparent 62%),
-    radial-gradient(500px 220px at 80% 10%, rgba(255,255,255,.08), transparent 70%),
-    linear-gradient(180deg, var(--bg-rose), var(--bg-plum) 55%, var(--bg-deep));
-}
-
-/* 中央の小ぶりな本棚フレーム */
-.bookshelf{
-  width:min(94vw, 356px);
-  padding:14px 12px 10px;
-  border-radius:20px;
-  position:relative;
-  background:
-    linear-gradient(180deg, var(--panel-1), var(--panel-2));
-  border:1px solid rgba(255,235,245,.35);
-  box-shadow:
-    0 16px 34px rgba(20,8,18,.35),
-    0 1px 0 rgba(255,255,255,.35) inset;
-}
-
-/* 外側の金装飾ライン */
-.bookshelf::before{
-  content:"";
-  position:absolute;
-  inset:7px;
-  border-radius:15px;
-  pointer-events:none;
-  border:1px solid rgba(243,217,138,.55);
-  box-shadow:
-    0 0 0 1px rgba(120,84,30,.20) inset,
-    0 0 12px rgba(243,217,138,.18);
-}
-
-/* ロココ風オーナメント（上・下） */
-.bookshelf::after{
-  content:"❦  ✦  ❦";
-  position:absolute;
-  left:50%;
-  top:4px;
-  transform:translateX(-50%);
-  font-size:11px;
-  letter-spacing:.18em;
-  color:rgba(243,217,138,.95);
-  text-shadow:0 1px 0 rgba(85,55,12,.35);
-  pointer-events:none;
-}
-
-/* 段 */
-.shelf-row{
-  padding:9px 8px 14px;
-  margin:0 0 8px;
-  border-radius:12px;
-  background:rgba(255,255,255,.04);
-}
-
-/* 本の間隔を少し広め */
-.book-list{ gap:10px; }
-
-/* 背表紙：絹のような光沢 */
-.book{
-  width:32px;
-  height:146px;
-  border-radius:10px 10px 5px 5px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.65) inset,
-    0 -10px 14px rgba(255,255,255,.08) inset,
-    1px 2px 0 rgba(0,0,0,.16);
-}
-
-/* 疑似要素再有効（今回は装飾に使う） */
-.book::before,
-.book::after{ content:""; position:absolute; pointer-events:none; }
-
-/* 空本（白絹） */
-.book.empty{
-  background:
-    linear-gradient(105deg, #fff 0%, var(--silk-1) 26%, var(--silk-2) 52%, var(--silk-1) 74%, #fff 100%);
-}
-
-/* 入力済み本（やや色絹） */
-.book.filled{
-  background:
-    linear-gradient(105deg, #fff 0%, #fdf6fb 24%, #f4e8f1 50%, #fdf7fb 74%, #fff 100%);
-}
-
-/* 絹の“照り筋” */
-.book::before{
-  left:-30%;
-  top:0;
-  width:70%;
-  height:100%;
-  transform:skewX(-12deg);
-  background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.08));
-  opacity:.55;
-}
-
-/* 金の小ラベル */
-.book.filled::after{
-  left:50%;
-  top:8px;
-  transform:translateX(-50%);
-  width:62%;
-  height:10px;
-  border-radius:999px;
-  background:linear-gradient(180deg, var(--gold-1), var(--gold-2) 60%, var(--gold-3));
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.55) inset,
-    0 1px 2px rgba(0,0,0,.18);
-}
-
-/* タイトル */
-.book-title{
-  color:var(--ink);
-  font-size:10.5px;
-  line-height:1.2;
-  letter-spacing:.05em;
-  text-shadow:0 1px 0 rgba(255,255,255,.58);
-  font-family:
-    "Hiragino Mincho ProN",
-    "Yu Mincho",
-    "Noto Serif JP",
-    serif;
-}
-
-/* 棚板も重すぎない上品木目 */
-.plank{
-  height:8px;
-  border-radius:5px;
-  background:
-    linear-gradient(180deg, #a17058, #7b523f 68%, #644132);
-  box-shadow: 0 1px 4px rgba(0,0,0,.18) inset;
-}
-      /* ===== 本棚だけリアル化 ===== */
-
-/* 本棚サイズは詰めたまま（5冊ジャスト基準） */
-.bookshelf{
-  --book-w: 32px;
-  --gap: 10px;
-  --side-pad: 10px;
-
-  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
-  max-width: 92vw;
-  padding: 12px 10px 10px;
-  border-radius: 6px;
-  position: relative;
-
-  /* 木のベース色 */
-  background:
-    linear-gradient(180deg, #7a533c 0%, #694632 45%, #5b3c2b 100%);
-  border: 1px solid #4a2f22;
-
-  /* フレームの重厚感 */
-  box-shadow:
-    0 14px 26px rgba(0,0,0,.35),
-    0 2px 0 rgba(255,255,255,.14) inset,
-    0 -2px 0 rgba(0,0,0,.18) inset;
-}
-
-/* 木目オーバーレイ */
-.bookshelf::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:6px;
-  pointer-events:none;
-  opacity:.45;
-  background:
-    repeating-linear-gradient(
-      8deg,
-      rgba(255,255,255,.06) 0 2px,
-      rgba(0,0,0,.05) 2px 4px,
-      rgba(255,255,255,.03) 4px 7px
-    );
-  mix-blend-mode: overlay;
-}
-
-/* 内側フレーム（額縁っぽい段差） */
-.bookshelf::after{
-  content:"";
-  position:absolute;
-  inset:6px;
-  border-radius:3px;
-  pointer-events:none;
-  border:1px solid rgba(255,255,255,.12);
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.18) inset,
-    0 1px 0 rgba(255,255,255,.08);
-}
-
-/* 各段は透明にして“木枠”を見せる */
-.shelf-row{
-  padding: 8px var(--side-pad) 14px;
-  margin: 0 0 8px;
-  border-radius: 0;
-  background: transparent;
-}
-.shelf-row:last-child{ margin-bottom:0; }
-
-/* 棚板をリアル寄りに */
-.plank{
-  left: 6px;
-  right: 6px;
-  bottom: 0;
-  height: 11px;
-  border-radius: 2px;
-  pointer-events:none;
-  z-index:1;
-
-  background:
-    linear-gradient(180deg, #9b6a4a 0%, #7f543d 55%, #694632 100%);
-  border-top: 1px solid rgba(255,255,255,.22);
-  border-bottom: 1px solid rgba(0,0,0,.25);
-
-  box-shadow:
-    0 2px 3px rgba(0,0,0,.22),
-    0 1px 0 rgba(255,255,255,.08) inset,
-    0 -2px 2px rgba(0,0,0,.12) inset;
-}
-
-/* 本は現状維持（必要最低限だけ） */
-.book{
-  width: var(--book-w);
-}
-.book-list{
-  gap: var(--gap);
-  justify-content: center;
-}
     </style>
   </head>
   <body>
