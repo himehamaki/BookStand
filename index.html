@@ -193,6 +193,113 @@
       .btn.sub{ background:#374151; color:#fff; }
       .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
       .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+      /* ===== かわいい + 格調高い装飾 ===== */
+
+/* 全体を少し上品な色味に */
+:root{
+  --gold-1:#e7c97a;
+  --gold-2:#c9a44e;
+  --gold-shadow:rgba(80,50,10,.28);
+}
+
+/* 本棚フレームを小さく上品に */
+.bookshelf{
+  width:min(94vw, 360px);
+  padding:12px 12px 10px;
+  border-radius:18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.25),
+    0 1px 0 rgba(255,255,255,.35) inset;
+  position:relative;
+}
+
+/* フレーム内側の金ライン */
+.bookshelf::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border-radius:13px;
+  pointer-events:none;
+  border:1px solid rgba(231,201,122,.45);
+  box-shadow: 0 0 0 1px rgba(90,60,20,.08) inset;
+}
+
+/* 上下に控えめな飾り罫 */
+.bookshelf::after{
+  content:"❦";
+  position:absolute;
+  left:50%;
+  top:4px;
+  transform:translateX(-50%);
+  font-size:12px;
+  color:rgba(231,201,122,.9);
+  text-shadow:0 1px 0 var(--gold-shadow);
+  pointer-events:none;
+}
+
+/* 段を詰めて可愛く */
+.shelf-row{
+  padding:9px 8px 14px;
+  margin:0 0 8px;
+  border-radius:12px;
+  background:rgba(255,255,255,.03);
+}
+
+/* 本同士の間隔 */
+.book-list{
+  gap:10px;
+}
+
+/* 本をほんの少し細身へ */
+.book{
+  width:32px;
+  height:144px;
+  border-radius:9px 9px 5px 5px;
+}
+
+/* 背表紙の上部に金箔ラベル */
+.book.filled{
+  position:relative;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.36) 0 22%, transparent 22% 100%),
+    linear-gradient(180deg, #fbfcfe, #e9edf3);
+}
+.book.filled::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:8px;
+  transform:translateX(-50%);
+  width:62%;
+  height:10px;
+  border-radius:999px;
+  background:linear-gradient(180deg, var(--gold-1), var(--gold-2));
+  box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* タイトル文字を少し格調高く */
+.book-title{
+  font-size:10.5px;
+  letter-spacing:.04em;
+  color:#2b3445;
+  text-shadow:0 1px 0 rgba(255,255,255,.55);
+  font-family:
+    "Hiragino Mincho ProN",
+    "Yu Mincho",
+    "Noto Serif JP",
+    serif;
+}
+
+/* 棚板を華奢に */
+.plank{
+  height:8px;
+  border-radius:5px;
+  background: linear-gradient(180deg, #9a6a49, #744c35 68%, #5b3b2b);
+  box-shadow: 0 1px 4px rgba(0,0,0,.18) inset;
+}
     </style>
   </head>
   <body>
