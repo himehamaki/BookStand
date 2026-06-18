@@ -2,416 +2,394 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111827" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#5b3a29" />
     <link rel="manifest" href="manifest.json" />
     <title>BookStand</title>
     <style>
-      :root {
-        --bg: #0b1020;
-        --panel: #111827;
-        --panel-2: #1f2937;
-        --text: #f9fafb;
-        --muted: #9ca3af;
-        --accent: #60a5fa;
-        --danger: #ef4444;
+      :root{
+        --wood-1:#6f4a33;
+        --wood-2:#5b3a29;
+        --wood-3:#4b2f21;
+        --shelf-shadow: rgba(0,0,0,.22);
+        --book-empty:#ffffff;
+        --book-text:#1f2937;
       }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: linear-gradient(180deg, #0b1020 0%, #111827 100%);
-        color: var(--text);
-        min-height: 100vh;
+
+      *{ box-sizing:border-box; }
+      html,body{ height:100%; margin:0; }
+      body{
+        font-family: "Hiragino Kaku Gothic ProN","Yu Gothic UI",system-ui,-apple-system,sans-serif;
+        color:#f8fafc;
+        background:
+          radial-gradient(1200px 600px at 20% -10%, #7b5238 0%, transparent 60%),
+          linear-gradient(180deg, var(--wood-1), var(--wood-2) 45%, var(--wood-3));
       }
-      .app {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 16px;
+
+      .wrap{
+        max-width:1100px;
+        margin:0 auto;
+        padding:20px 14px 28px;
       }
-      h1 { margin: 0 0 8px; font-size: 1.6rem; }
-      .sub { color: var(--muted); margin-bottom: 16px; }
-      .toolbar {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
+
+      .title{
+        margin:0 0 14px;
+        font-size:clamp(1.1rem, 2.5vw, 1.5rem);
+        font-weight:700;
+        letter-spacing:.02em;
+        opacity:.95;
       }
-      button {
-        background: var(--panel-2);
-        color: var(--text);
-        border: 1px solid #374151;
-        border-radius: 10px;
-        padding: 10px 12px;
-        cursor: pointer;
+
+      .bookshelf{
+        background: rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.15);
+        border-radius:14px;
+        padding:14px;
+        backdrop-filter: blur(2px);
       }
-      button.primary { background: var(--accent); color: #031025; border: none; font-weight: 700; }
-      button.danger { background: transparent; border-color: #7f1d1d; color: #fecaca; }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 12px;
+
+      .shelf-row{
+        position:relative;
+        margin:0 0 16px;
+        padding:16px 12px 22px;
+        border-radius:10px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       }
-      .card {
-        background: rgba(17, 24, 39, 0.85);
-        border: 1px solid #374151;
-        border-radius: 12px;
-        padding: 12px;
+
+      .shelf-row:last-child{ margin-bottom:0; }
+
+      .plank{
+        position:absolute;
+        left:0; right:0; bottom:0;
+        height:12px;
+        border-radius:8px;
+        background: linear-gradient(180deg, #8b5d3f, #6f4a33 60%, #5a3b2a);
+        box-shadow: 0 3px 8px var(--shelf-shadow) inset, 0 4px 10px rgba(0,0,0,.18);
       }
-      .slot { color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
-      .title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
-      .meta { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
-      .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-      dialog {
-        border: 1px solid #374151;
-        border-radius: 12px;
-        background: var(--panel);
-        color: var(--text);
-        width: min(560px, 92vw);
+
+      .book-list{
+        display:grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap:10px;
       }
-      dialog::backdrop { background: rgba(0,0,0,0.55); }
-      .field { margin-bottom: 12px; }
-      label { display: block; margin-bottom: 6px; color: var(--muted); }
-      input, textarea, select {
-        width: 100%;
-        background: #0b1220;
-        color: var(--text);
-        border: 1px solid #374151;
-        border-radius: 10px;
-        padding: 10px;
+
+      @media (max-width: 900px){
+        .book-list{ grid-template-columns: repeat(5, minmax(56px, 1fr)); }
       }
-      textarea { min-height: 240px; resize: vertical; }
-      .list {
-        display: grid;
-        gap: 10px;
-        margin-top: 10px;
+
+      .book{
+        height:160px;
+        border:none;
+        border-radius:6px 6px 3px 3px;
+        cursor:pointer;
+        position:relative;
+        padding:8px 6px;
+        text-align:left;
+        box-shadow: 2px 2px 0 rgba(0,0,0,.16), inset -4px 0 0 rgba(0,0,0,.07);
+        transition: transform .08s ease;
       }
-      .item {
-        padding: 10px;
-        border: 1px solid #374151;
-        border-radius: 10px;
-        background: #0f172a;
+      .book:active{ transform: translateY(1px); }
+
+      .book.empty{
+        background: linear-gradient(90deg, #f8fafc 0 16%, #ffffff 16% 100%);
       }
-      .empty { color: var(--muted); padding: 12px; border: 1px dashed #374151; border-radius: 10px; }
-      .topline { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-      .muted { color: var(--muted); font-size: 0.85rem; }
+
+      .book.filled{
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.22) 0 14%, transparent 14% 100%),
+          linear-gradient(180deg, #f3f4f6, #e5e7eb);
+      }
+
+      .book-title{
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        height:100%;
+        width:100%;
+        overflow:hidden;
+        color:var(--book-text);
+        font-size:13px;
+        line-height:1.25;
+        letter-spacing:.02em;
+        margin:0;
+        user-select:none;
+      }
+
+      .book.empty .book-title{ color:transparent; }
+
+      /* モーダル */
+      dialog{
+        width:min(460px, 92vw);
+        border:none;
+        border-radius:14px;
+        padding:0;
+        overflow:hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      }
+      dialog::backdrop{ background: rgba(0,0,0,.45); }
+
+      .modal{
+        background:#111827;
+        color:#f9fafb;
+        padding:16px;
+      }
+
+      .modal h2{
+        margin:0 0 12px;
+        font-size:1rem;
+      }
+
+      .field{
+        margin-bottom:12px;
+      }
+
+      input, textarea{
+        width:100%;
+        border:1px solid #374151;
+        border-radius:10px;
+        background:#0b1220;
+        color:#f9fafb;
+        padding:10px 12px;
+        font:inherit;
+      }
+
+      textarea{
+        min-height:220px;
+        resize:vertical;
+      }
+
+      .row{
+        display:flex;
+        gap:8px;
+        justify-content:flex-end;
+      }
+
+      .btn{
+        border:none;
+        border-radius:10px;
+        padding:9px 12px;
+        cursor:pointer;
+        font:inherit;
+      }
+      .btn.sub{ background:#374151; color:#fff; }
+      .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
+      .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+
+      .hint{
+        font-size:.82rem;
+        opacity:.7;
+        margin:0 0 10px;
+      }
     </style>
   </head>
   <body>
-    <main class="app">
-      <h1>📚 BookStand</h1>
-      <div class="sub">10冊固定の本棚で管理する、シンプル執筆アプリ</div>
-      <div class="toolbar">
-        <button class="primary" id="createBookBtn">＋ 新しい本</button>
-      </div>
-      <section id="shelf" class="grid"></section>
+    <main class="wrap">
+      <h1 class="title">本棚</h1>
+
+      <section class="bookshelf">
+        <div class="shelf-row">
+          <div id="row1" class="book-list"></div>
+          <div class="plank"></div>
+        </div>
+        <div class="shelf-row">
+          <div id="row2" class="book-list"></div>
+          <div class="plank"></div>
+        </div>
+      </section>
     </main>
 
-    <dialog id="bookDialog">
-      <form method="dialog" id="bookForm">
-        <h3>新しい本を作成</h3>
+    <!-- タイトル入力 -->
+    <dialog id="titleDialog">
+      <form method="dialog" class="modal" id="titleForm">
+        <h2>本のタイトル</h2>
+        <p class="hint">未入力なら白い背表紙のままです。</p>
         <div class="field">
-          <label for="bookTitle">本のタイトル</label>
-          <input id="bookTitle" required maxlength="60" placeholder="例: 夏の終わり" />
+          <input id="titleInput" maxlength="60" placeholder="タイトルを入力" />
         </div>
-        <div class="field">
-          <label for="bookSlot">入れるスロット（1〜10）</label>
-          <select id="bookSlot" required></select>
-        </div>
-        <div class="actions">
-          <button value="cancel">キャンセル</button>
-          <button class="primary" id="saveBookBtn" value="default">作成</button>
+        <div class="row">
+          <button class="btn sub" value="cancel" type="button" id="titleCancel">キャンセル</button>
+          <button class="btn main" value="default" type="submit">保存</button>
         </div>
       </form>
     </dialog>
 
+    <!-- 本文編集 -->
     <dialog id="editorDialog">
-      <div id="editorRoot"></div>
+      <div class="modal">
+        <h2 id="editorHeading">本文</h2>
+        <p class="hint">この端末のブラウザに自動保存されます。</p>
+        <div class="field">
+          <textarea id="bodyInput" placeholder="ここに本文を書いてください"></textarea>
+        </div>
+        <div class="row">
+          <button class="btn danger" type="button" id="deleteBtn">この本を削除</button>
+          <button class="btn sub" type="button" id="closeEditor">閉じる</button>
+        </div>
+      </div>
     </dialog>
 
     <script>
-      const DB_KEY = "bookstand_v1";
+      const KEY = "bookstand_shelf_v2";
+      const SLOT_COUNT = 10;
 
-      const state = loadState();
-      renderShelf();
+      /** @type {{books: {slot:number,title:string,body:string,updatedAt:string}[]}} */
+      let db = load();
+
+      const row1 = document.getElementById("row1");
+      const row2 = document.getElementById("row2");
+
+      const titleDialog = document.getElementById("titleDialog");
+      const titleForm = document.getElementById("titleForm");
+      const titleInput = document.getElementById("titleInput");
+      const titleCancel = document.getElementById("titleCancel");
+
+      const editorDialog = document.getElementById("editorDialog");
+      const editorHeading = document.getElementById("editorHeading");
+      const bodyInput = document.getElementById("bodyInput");
+      const deleteBtn = document.getElementById("deleteBtn");
+      const closeEditor = document.getElementById("closeEditor");
+
+      let activeSlot = null;
+
+      render();
       setupPWA();
 
-      document.getElementById("createBookBtn").addEventListener("click", openCreateBookDialog);
-
-      function defaultState() {
-        return {
-          shelves: Array.from({ length: 10 }, (_, i) => ({ slot: i + 1, bookId: null })),
-          books: []
-        };
-      }
-
-      function nowIso() {
-        return new Date().toISOString();
-      }
-
-      function fmtDate(iso) {
-        if (!iso) return "-";
-        const d = new Date(iso);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      }
-
-      function loadState() {
-        const raw = localStorage.getItem(DB_KEY);
-        if (!raw) {
-          const initial = defaultState();
-          localStorage.setItem(DB_KEY, JSON.stringify(initial));
-          return initial;
-        }
-        try {
+      function load(){
+        try{
+          const raw = localStorage.getItem(KEY);
+          if(!raw) return { books: [] };
           const parsed = JSON.parse(raw);
-          if (!parsed.shelves || !parsed.books) return defaultState();
+          if(!parsed || !Array.isArray(parsed.books)) return { books: [] };
           return parsed;
-        } catch {
-          return defaultState();
+        }catch{
+          return { books: [] };
         }
       }
 
-      function persist() {
-        localStorage.setItem(DB_KEY, JSON.stringify(state));
+      function save(){
+        localStorage.setItem(KEY, JSON.stringify(db));
       }
 
-      function getBookById(bookId) {
-        return state.books.find(b => b.id === bookId) || null;
+      function getBook(slot){
+        return db.books.find(b => b.slot === slot) || null;
       }
 
-      function renderShelf() {
-        const shelf = document.getElementById("shelf");
-        shelf.innerHTML = "";
-
-        for (const slot of state.shelves) {
-          const card = document.createElement("article");
-          card.className = "card";
-          const book = slot.bookId ? getBookById(slot.bookId) : null;
-
-          if (!book) {
-            card.innerHTML = `
-              <div class="slot">スロット ${slot.slot}</div>
-              <div class="title">（空）</div>
-              <div class="meta">本を作成して執筆を開始できます。</div>
-              <div class="actions"><button data-action="new-in-slot" data-slot="${slot.slot}">この枠で作成</button></div>
-            `;
-          } else {
-            card.innerHTML = `
-              <div class="slot">スロット ${slot.slot}</div>
-              <div class="title">${escapeHtml(book.title)}</div>
-              <div class="meta">開始日: ${fmtDate(book.createdAt)}<br>最終更新: ${fmtDate(book.updatedAt)}</div>
-              <div class="actions">
-                <button data-action="open" data-id="${book.id}">開く</button>
-                <button data-action="rename" data-id="${book.id}">タイトル変更</button>
-                <button class="danger" data-action="delete" data-id="${book.id}">削除</button>
-              </div>
-            `;
-          }
-          shelf.appendChild(card);
+      function upsertBook(slot, patch){
+        const now = new Date().toISOString();
+        const found = getBook(slot);
+        if(found){
+          Object.assign(found, patch, { updatedAt: now });
+        }else{
+          db.books.push({
+            slot,
+            title: "",
+            body: "",
+            updatedAt: now,
+            ...patch
+          });
         }
-
-        shelf.querySelectorAll("button").forEach(btn => btn.addEventListener("click", onShelfAction));
+        save();
       }
 
-      function onShelfAction(e) {
-        const action = e.currentTarget.dataset.action;
-        if (action === "new-in-slot") {
-          openCreateBookDialog(Number(e.currentTarget.dataset.slot));
-          return;
+      function removeBook(slot){
+        db.books = db.books.filter(b => b.slot !== slot);
+        save();
+      }
+
+      function render(){
+        row1.innerHTML = "";
+        row2.innerHTML = "";
+
+        for(let slot=1; slot<=SLOT_COUNT; slot++){
+          const book = getBook(slot);
+          const hasTitle = !!(book && book.title && book.title.trim());
+
+          const btn = document.createElement("button");
+          btn.className = "book " + (hasTitle ? "filled" : "empty");
+          btn.type = "button";
+          btn.dataset.slot = String(slot);
+          btn.title = hasTitle ? book.title : "未設定";
+          btn.innerHTML = `<p class="book-title">${hasTitle ? escapeHtml(book.title) : "　"}</p>`;
+
+          btn.addEventListener("click", () => onBookTap(slot));
+
+          if(slot <= 5) row1.appendChild(btn);
+          else row2.appendChild(btn);
         }
-        const id = e.currentTarget.dataset.id;
-        const book = getBookById(id);
-        if (!book) return;
-
-        if (action === "open") openEditor(book.id);
-        if (action === "rename") renameBook(book.id);
-        if (action === "delete") deleteBook(book.id);
       }
 
-      function openCreateBookDialog(preferredSlot = null) {
-        const dialog = document.getElementById("bookDialog");
-        const form = document.getElementById("bookForm");
-        const titleInput = document.getElementById("bookTitle");
-        const slotSelect = document.getElementById("bookSlot");
+      function onBookTap(slot){
+        activeSlot = slot;
+        const book = getBook(slot);
 
-        titleInput.value = "";
-        slotSelect.innerHTML = "";
-
-        const emptySlots = state.shelves.filter(s => !s.bookId).map(s => s.slot);
-        if (emptySlots.length === 0) {
-          alert("本棚は10冊すべて使用中です。削除して空きを作ってください。");
+        // タイトル未設定 -> まずタイトル入力
+        if(!book || !book.title || !book.title.trim()){
+          titleInput.value = book?.title ?? "";
+          titleDialog.showModal();
+          setTimeout(() => titleInput.focus(), 0);
           return;
         }
 
-        for (const s of emptySlots) {
-          const option = document.createElement("option");
-          option.value = String(s);
-          option.textContent = `スロット ${s}`;
-          if (preferredSlot === s) option.selected = true;
-          slotSelect.appendChild(option);
+        // タイトルあり -> 本文編集
+        openEditor(slot);
+      }
+
+      titleForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if(activeSlot == null) return;
+
+        const nextTitle = titleInput.value.trim();
+        upsertBook(activeSlot, { title: nextTitle });
+
+        titleDialog.close();
+        render();
+
+        // タイトルが入ったら、そのまま本文へ
+        if(nextTitle){
+          openEditor(activeSlot);
         }
+      });
 
-        const submitHandler = (ev) => {
-          ev.preventDefault();
-          const title = titleInput.value.trim();
-          const slot = Number(slotSelect.value);
-          if (!title || !slot) return;
-          createBook(title, slot);
-          dialog.close();
-          form.removeEventListener("submit", submitHandler);
-        };
+      titleCancel.addEventListener("click", () => {
+        titleDialog.close();
+      });
 
-        form.addEventListener("submit", submitHandler);
-        dialog.showModal();
+      function openEditor(slot){
+        const book = getBook(slot) || { title:"", body:"" };
+        editorHeading.textContent = book.title || `本 ${slot}`;
+        bodyInput.value = book.body || "";
+        editorDialog.showModal();
+        setTimeout(() => bodyInput.focus(), 0);
       }
 
-      function createBook(title, slotNo) {
-        const slot = state.shelves.find(s => s.slot === slotNo);
-        if (!slot || slot.bookId) return;
-        const id = crypto.randomUUID();
-        const t = nowIso();
-        state.books.push({ id, title, createdAt: t, updatedAt: t, fragments: [] });
-        slot.bookId = id;
-        persist();
-        renderShelf();
-      }
+      bodyInput.addEventListener("input", () => {
+        if(activeSlot == null) return;
+        const book = getBook(activeSlot) || { title:"" };
+        upsertBook(activeSlot, { title: book.title || "", body: bodyInput.value });
+      });
 
-      function renameBook(bookId) {
-        const book = getBookById(bookId);
-        if (!book) return;
-        const next = prompt("新しいタイトル", book.title);
-        if (!next) return;
-        book.title = next.trim().slice(0, 60) || book.title;
-        book.updatedAt = nowIso();
-        persist();
-        renderShelf();
-      }
+      deleteBtn.addEventListener("click", () => {
+        if(activeSlot == null) return;
+        if(!confirm("この本を削除します。よろしいですか？")) return;
+        removeBook(activeSlot);
+        editorDialog.close();
+        render();
+      });
 
-      function deleteBook(bookId) {
-        const book = getBookById(bookId);
-        if (!book) return;
-        const ok = confirm(`「${book.title}」を削除します。元に戻せません。`);
-        if (!ok) return;
+      closeEditor.addEventListener("click", () => editorDialog.close());
 
-        state.books = state.books.filter(b => b.id !== bookId);
-        const slot = state.shelves.find(s => s.bookId === bookId);
-        if (slot) slot.bookId = null;
-        persist();
-        renderShelf();
-      }
-
-      function openEditor(bookId) {
-        const book = getBookById(bookId);
-        if (!book) return;
-
-        const dialog = document.getElementById("editorDialog");
-        const root = document.getElementById("editorRoot");
-
-        root.innerHTML = `
-          <div class="topline">
-            <h3 style="margin:0">${escapeHtml(book.title)}</h3>
-            <button id="closeEditorBtn">閉じる</button>
-          </div>
-          <div class="muted" style="margin:8px 0 12px;">開始日: ${fmtDate(book.createdAt)} / 最終更新: ${fmtDate(book.updatedAt)}</div>
-          <div class="actions" style="margin-bottom:10px;">
-            <button class="primary" id="addFragmentBtn">＋ 断片を追加</button>
-          </div>
-          <div id="fragmentList" class="list"></div>
-        `;
-
-        const list = root.querySelector("#fragmentList");
-        renderFragments(list, bookId);
-
-        root.querySelector("#closeEditorBtn").addEventListener("click", () => dialog.close());
-        root.querySelector("#addFragmentBtn").addEventListener("click", () => {
-          const b = getBookById(bookId);
-          if (!b) return;
-          const t = nowIso();
-          b.fragments.push({ id: crypto.randomUUID(), title: "", body: "", createdAt: t, updatedAt: t });
-          b.updatedAt = t;
-          persist();
-          openEditor(bookId);
-        });
-
-        dialog.showModal();
-      }
-
-      function renderFragments(container, bookId) {
-        const book = getBookById(bookId);
-        if (!book) return;
-        if (book.fragments.length === 0) {
-          container.innerHTML = '<div class="empty">まだ断片がありません。「＋ 断片を追加」から始めてください。</div>';
-          return;
-        }
-
-        container.innerHTML = "";
-        for (const fragment of book.fragments) {
-          const el = document.createElement("div");
-          el.className = "item";
-          el.innerHTML = `
-            <div class="field">
-              <label>断片タイトル</label>
-              <input data-kind="title" data-id="${fragment.id}" value="${escapeAttr(fragment.title)}" placeholder="例: 駅前の再会" />
-            </div>
-            <div class="field">
-              <label>本文</label>
-              <textarea data-kind="body" data-id="${fragment.id}" placeholder="ここに本文を入力">${escapeHtml(fragment.body)}</textarea>
-            </div>
-            <div class="muted">作成: ${fmtDate(fragment.createdAt)} / 更新: ${fmtDate(fragment.updatedAt)}</div>
-            <div class="actions"><button class="danger" data-kind="remove" data-id="${fragment.id}">断片を削除</button></div>
-          `;
-          container.appendChild(el);
-        }
-
-        container.querySelectorAll("input[data-kind='title']").forEach(input => {
-          input.addEventListener("input", (e) => updateFragment(bookId, e.target.dataset.id, { title: e.target.value }));
-        });
-        container.querySelectorAll("textarea[data-kind='body']").forEach(textarea => {
-          textarea.addEventListener("input", (e) => updateFragment(bookId, e.target.dataset.id, { body: e.target.value }));
-        });
-        container.querySelectorAll("button[data-kind='remove']").forEach(btn => {
-          btn.addEventListener("click", (e) => removeFragment(bookId, e.target.dataset.id));
-        });
-      }
-
-      function updateFragment(bookId, fragmentId, patch) {
-        const book = getBookById(bookId);
-        if (!book) return;
-        const fragment = book.fragments.find(f => f.id === fragmentId);
-        if (!fragment) return;
-        Object.assign(fragment, patch, { updatedAt: nowIso() });
-        book.updatedAt = fragment.updatedAt;
-        persist();
-        renderShelf();
-      }
-
-      function removeFragment(bookId, fragmentId) {
-        const book = getBookById(bookId);
-        if (!book) return;
-        const ok = confirm("この断片を削除します。元に戻せません。");
-        if (!ok) return;
-        book.fragments = book.fragments.filter(f => f.id !== fragmentId);
-        book.updatedAt = nowIso();
-        persist();
-        openEditor(bookId);
-      }
-
-      function escapeHtml(str) {
+      function escapeHtml(str){
         return String(str)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#39;");
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#39;");
       }
 
-      function escapeAttr(str) {
-        return escapeHtml(str).replaceAll("`", "&#96;");
-      }
-
-      function setupPWA() {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      function setupPWA(){
+        if("serviceWorker" in navigator){
+          navigator.serviceWorker.register("service-worker.js").catch(()=>{});
         }
       }
     </script>
