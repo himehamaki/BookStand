@@ -1,500 +1,392 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#7b5236" />
-    <link rel="manifest" href="manifest.json" />
-    <title>BookStand</title>
-    <style>
-      :root{
-        --book-w: 32px;
-        --book-h: 148px;
-        --gap: 10px;
-        --side-pad: 10px;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#7b5236" />
+  <link rel="manifest" href="manifest.json" />
+  <title>BookStand</title>
+  <style>
+    :root{
+      --book-w: 38px;     /* ←本を戻す */
+      --book-h: 176px;    /* ←本を戻す */
+      --gap: 12px;        /* ←間隔少し広め */
+      --side-pad: 14px;
+    }
 
-        --wall-1:#ddd6cc;
-        --wall-2:#cfc6ba;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; }
 
-        --wood-1:#a87650;
-        --wood-2:#8c5e3f;
-        --wood-3:#744c33;
-        --wood-dark:#5e3c29;
+    body{
+      font-family:
+        "Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",
+        system-ui,-apple-system,sans-serif;
+      background:
+        radial-gradient(1200px 500px at 50% -20%, rgba(255,255,255,.18), transparent 60%),
+        linear-gradient(180deg, #ddd6cc, #cfc6ba);
+      color:#2b2b2b;
+    }
 
-        --ink:#2b3445;
-      }
+    .wrap{
+      min-height:100dvh;
+      display:grid;
+      place-items:center;
+      padding:16px;
+    }
 
-      *{ box-sizing:border-box; }
-      html,body{ height:100%; margin:0; }
+    .title{ display:none; }
 
-      body{
-        font-family:
-          "Hiragino Kaku Gothic ProN",
-          "Yu Gothic UI",
-          "Noto Sans JP",
-          system-ui,
-          -apple-system,
-          sans-serif;
-        color:#2b2b2b;
-        background:
-          radial-gradient(1200px 500px at 50% -20%, rgba(255,255,255,.18), transparent 60%),
-          linear-gradient(180deg, var(--wall-1), var(--wall-2));
-      }
+    .bookshelf{
+      width:min(94vw, 420px);   /* ←棚をちゃんと確保 */
+      padding:14px 12px 12px;
+      border-radius:6px;
+      position:relative;
+      background:linear-gradient(180deg, #a87650, #8c5e3f 52%, #744c33);
+      border:1px solid #5e3c29;
+      box-shadow:
+        0 10px 24px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.18),
+        inset 0 -1px 0 rgba(0,0,0,.20);
+    }
 
-      .wrap{
-        min-height:100dvh;
-        display:grid;
-        place-items:center;
-        padding:12px;
-      }
+    .bookshelf::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      border-radius:6px;
+      opacity:.22;
+      background:repeating-linear-gradient(
+        7deg,
+        rgba(255,255,255,.05) 0 2px,
+        rgba(0,0,0,.05) 2px 4px,
+        rgba(255,255,255,.02) 4px 7px
+      );
+    }
 
-      .title{ display:none; }
+    .shelf-row{
+      position:relative;
+      padding:12px var(--side-pad) 18px;
+      margin:0 0 10px;
+      border-radius:4px;
+      background:linear-gradient(
+        180deg,
+        rgba(0,0,0,.22) 0%,
+        rgba(0,0,0,.10) 30%,
+        rgba(255,255,255,.03) 56%,
+        rgba(0,0,0,.16) 100%
+      );
+      box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.25),
+        inset 0 -1px 2px rgba(0,0,0,.16);
+    }
+    .shelf-row:last-child{ margin-bottom:0; }
 
-      .bookshelf{
-        width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
-        max-width:92vw;
-        padding:12px 10px 10px;
-        border-radius:4px;
-        position:relative;
-        background: linear-gradient(180deg, var(--wood-1), var(--wood-2) 52%, var(--wood-3));
-        border:1px solid var(--wood-dark);
-        box-shadow:
-          0 10px 24px rgba(0,0,0,.30),
-          inset 0 1px 0 rgba(255,255,255,.18),
-          inset 0 -1px 0 rgba(0,0,0,.20);
-      }
+    .book-list{
+      position:relative;
+      z-index:2;
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      gap:var(--gap);
+      flex-wrap:nowrap;
+    }
 
-      .bookshelf::before{
-        content:"";
-        position:absolute;
-        inset:0;
-        pointer-events:none;
-        border-radius:4px;
-        opacity:.30;
-        background:
-          repeating-linear-gradient(
-            7deg,
-            rgba(255,255,255,.05) 0 2px,
-            rgba(0,0,0,.05) 2px 4px,
-            rgba(255,255,255,.02) 4px 7px
-          );
-      }
+    .book{
+      width:var(--book-w);
+      height:var(--book-h);
+      border:none;
+      cursor:pointer;
+      border-radius:4px;
+      padding:10px 5px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.58),
+        0 0 0 1px rgba(0,0,0,.10),
+        0 1px 0 rgba(0,0,0,.18);
+    }
 
-      .bookshelf::after{
-        content:none;
-      }
+    .book.empty,
+    .book.filled{
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.42) 0 20%, transparent 20% 100%),
+        linear-gradient(105deg, #fdfefe 0%, #eef2f7 52%, #e6ebf2 100%);
+    }
 
-      .shelf-row{
-        position:relative;
-        overflow:visible;
-        padding:10px var(--side-pad) 16px;
-        margin:0 0 8px;
-        border-radius:2px;
-        background:
-          linear-gradient(
-            180deg,
-            rgba(0,0,0,.28) 0%,
-            rgba(0,0,0,.16) 28%,
-            rgba(255,255,255,.03) 55%,
-            rgba(0,0,0,.22) 100%
-          );
-        box-shadow:
-          inset 0 3px 6px rgba(0,0,0,.32),
-          inset 0 -2px 3px rgba(0,0,0,.22),
-          inset 0 1px 0 rgba(255,255,255,.05);
-      }
-      .shelf-row:last-child{ margin-bottom:0; }
+    .book-title{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      max-height:92%;
+      margin:0 auto;
+      overflow:hidden;
+      text-align:center;
+      color:#2b3445;
+      font-size:11px;
+      line-height:1.2;
+      letter-spacing:.04em;
+      user-select:none;
+      text-shadow:0 1px 0 rgba(255,255,255,.55);
+      font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+    }
+    .book.empty .book-title{ color:transparent; }
 
-      .book-list{
-        position:relative;
-        z-index:2;
-        display:flex;
-        justify-content:center;
-        align-items:flex-end;
-        gap:var(--gap);
-        flex-wrap:nowrap;
-        padding-bottom:0;
-      }
+    .plank{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:13px;
+      z-index:3;
+      pointer-events:none;
+      background:linear-gradient(180deg, #b07a52 0%, #925f40 58%, #784d34 100%);
+      border-top:1px solid rgba(255,255,255,.22);
+      border-bottom:1px solid rgba(0,0,0,.30);
+    }
 
-      .book{
-        width:var(--book-w);
-        height:var(--book-h);
-        flex:0 0 auto;
-        border:none;
-        cursor:pointer;
-        position:relative;
-        overflow:hidden;
-        padding:8px 4px 6px;
-        border-radius:3px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        transition:transform .08s ease, filter .12s ease;
-        transform:none;
-        margin-bottom:0;
-        box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.58),
-          0 0 0 1px rgba(0,0,0,.10),
-          0 1px 0 rgba(0,0,0,.18);
-      }
-      .book:active{
-        transform:translateY(1px) scale(.995);
-        filter:brightness(.98);
-      }
+    dialog{
+      width:min(460px, 92vw);
+      border:none;
+      border-radius:14px;
+      padding:0;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+    }
+    dialog::backdrop{ background:rgba(0,0,0,.45); }
 
-      .book::before{
-        content:none !important;
-      }
+    .modal{ background:#111827; color:#f9fafb; padding:18px; }
+    .modal h2{ margin:0 0 10px; font-size:1.02rem; }
+    .field{ margin-bottom:12px; }
 
-      .book.empty,
-      .book.filled{
-        background:
-          linear-gradient(90deg, rgba(255,255,255,.42) 0 20%, transparent 20% 100%),
-          repeating-linear-gradient(
-            180deg,
-            rgba(255,255,255,.06) 0 1px,
-            rgba(0,0,0,.03) 1px 2px
-          ),
-          linear-gradient(105deg, #fdfefe 0%, #eef2f7 52%, #e6ebf2 100%);
-      }
+    input, textarea{
+      width:100%;
+      border:1px solid #4b5563;
+      border-radius:12px;
+      background:#0f172a;
+      color:#f9fafb;
+      padding:12px 14px;
+      font:inherit;
+      font-size:16px;
+      line-height:1.5;
+    }
 
-      .book.filled::after{
-        content:none !important;
-      }
+    textarea{ min-height:280px; resize:vertical; }
 
-      .book-title{
-        writing-mode:vertical-rl;
-        text-orientation:mixed;
-        height:auto;
-        width:auto;
-        max-height:92%;
-        margin:0 auto;
-        padding:0;
-        overflow:hidden;
-        text-align:center;
-        color:var(--ink);
-        font-size:10.5px;
-        line-height:1.2;
-        letter-spacing:.04em;
-        user-select:none;
-        text-shadow:0 1px 0 rgba(255,255,255,.55);
-        font-family:
-          "Hiragino Mincho ProN",
-          "Yu Mincho",
-          "Noto Serif JP",
-          serif;
-      }
-      .book.empty .book-title{ color:transparent; }
+    .row{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
 
-      .plank{
-        z-index:3;
-        pointer-events:none;
-        position:absolute;
-        left:0;
-        right:0;
-        bottom:0;
-        height:12px;
-        border-radius:0;
-        background:
-          linear-gradient(180deg, #b07a52 0%, #925f40 58%, #784d34 100%);
-        border-top:1px solid rgba(255,255,255,.22);
-        border-bottom:1px solid rgba(0,0,0,.30);
-        box-shadow:
-          0 1px 2px rgba(0,0,0,.25),
-          inset 0 1px 0 rgba(255,255,255,.10),
-          inset 0 -1px 1px rgba(0,0,0,.18);
-      }
+    .btn{
+      border:none;
+      border-radius:12px;
+      min-height:42px;
+      padding:10px 14px;
+      cursor:pointer;
+      font:inherit;
+    }
+    .btn.sub{ background:#374151; color:#fff; }
+    .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
+    .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="title">本棚</h1>
 
-      .plank::after{
-        content:"";
-        position:absolute;
-        left:0;
-        right:0;
-        bottom:0;
-        height:2px;
-        background:rgba(0,0,0,.22);
-      }
-
-      dialog{
-        width:min(460px, 92vw);
-        border:none;
-        border-radius:14px;
-        padding:0;
-        overflow:hidden;
-        box-shadow:0 20px 60px rgba(0,0,0,.35);
-      }
-      dialog::backdrop{ background:rgba(0,0,0,.45); }
-
-      .modal{
-        background:#111827;
-        color:#f9fafb;
-        padding:18px;
-      }
-
-      .modal h2{
-        margin:0 0 10px;
-        font-size:1.02rem;
-      }
-
-      .field{ margin-bottom:12px; }
-
-      input, textarea{
-        width:100%;
-        border:1px solid #4b5563;
-        border-radius:12px;
-        background:#0f172a;
-        color:#f9fafb;
-        padding:12px 14px;
-        font:inherit;
-        font-size:16px;
-        line-height:1.5;
-      }
-
-      input:focus, textarea:focus{
-        outline:none;
-        border-color:#93c5fd;
-        box-shadow:0 0 0 3px rgba(147,197,253,.25);
-      }
-
-      textarea{
-        min-height:280px;
-        resize:vertical;
-      }
-
-      .row{
-        display:flex;
-        gap:8px;
-        justify-content:flex-end;
-        flex-wrap:wrap;
-      }
-
-      .btn{
-        border:none;
-        border-radius:12px;
-        min-height:42px;
-        padding:10px 14px;
-        cursor:pointer;
-        font:inherit;
-      }
-      .btn.sub{ background:#374151; color:#fff; }
-      .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
-      .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
-    </style>
-  </head>
-  <body>
-    <main class="wrap">
-      <h1 class="title">本棚</h1>
-
-      <section class="bookshelf">
-        <div class="shelf-row">
-          <div id="row1" class="book-list"></div>
-          <div class="plank"></div>
-        </div>
-        <div class="shelf-row">
-          <div id="row2" class="book-list"></div>
-          <div class="plank"></div>
-        </div>
-      </section>
-    </main>
-
-    <dialog id="titleDialog">
-      <form method="dialog" class="modal" id="titleForm">
-        <h2>本のタイトル</h2>
-        <div class="field">
-          <input id="titleInput" maxlength="60" placeholder="タイトルを入力" />
-        </div>
-        <div class="row">
-          <button class="btn sub" value="cancel" type="button" id="titleCancel">キャンセル</button>
-          <button class="btn main" value="default" type="submit">保存</button>
-        </div>
-      </form>
-    </dialog>
-
-    <dialog id="editorDialog">
-      <div class="modal">
-        <h2 id="editorHeading">本文</h2>
-        <div class="field">
-          <textarea id="bodyInput" placeholder="ここに本文を書いてください"></textarea>
-        </div>
-        <div class="row">
-          <button class="btn sub" type="button" id="renameBtn">タイトル変更</button>
-          <button class="btn danger" type="button" id="deleteBtn">この本を削除</button>
-          <button class="btn sub" type="button" id="closeEditor">閉じる</button>
-        </div>
+    <section class="bookshelf">
+      <div class="shelf-row">
+        <div id="row1" class="book-list"></div>
+        <div class="plank"></div>
       </div>
-    </dialog>
+      <div class="shelf-row">
+        <div id="row2" class="book-list"></div>
+        <div class="plank"></div>
+      </div>
+    </section>
+  </main>
 
-    <script>
-      const KEY = "bookstand_shelf_v2";
-      const SLOT_COUNT = 10;
+  <dialog id="titleDialog">
+    <form method="dialog" class="modal" id="titleForm">
+      <h2>本のタイトル</h2>
+      <div class="field">
+        <input id="titleInput" maxlength="60" placeholder="タイトルを入力" />
+      </div>
+      <div class="row">
+        <button class="btn sub" value="cancel" type="button" id="titleCancel">キャンセル</button>
+        <button class="btn main" value="default" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
 
-      let db = load();
+  <dialog id="editorDialog">
+    <div class="modal">
+      <h2 id="editorHeading">本文</h2>
+      <div class="field">
+        <textarea id="bodyInput" placeholder="ここに本文を書いてください"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn sub" type="button" id="renameBtn">タイトル変更</button>
+        <button class="btn danger" type="button" id="deleteBtn">この本を削除</button>
+        <button class="btn sub" type="button" id="closeEditor">閉じる</button>
+      </div>
+    </div>
+  </dialog>
 
-      const row1 = document.getElementById("row1");
-      const row2 = document.getElementById("row2");
+  <script>
+    const KEY = "bookstand_shelf_v2";
+    const SLOT_COUNT = 10;
+    let db = load();
 
-      const titleDialog = document.getElementById("titleDialog");
-      const titleForm = document.getElementById("titleForm");
-      const titleInput = document.getElementById("titleInput");
-      const titleCancel = document.getElementById("titleCancel");
+    const row1 = document.getElementById("row1");
+    const row2 = document.getElementById("row2");
 
-      const editorDialog = document.getElementById("editorDialog");
-      const editorHeading = document.getElementById("editorHeading");
-      const bodyInput = document.getElementById("bodyInput");
-      const renameBtn = document.getElementById("renameBtn");
-      const deleteBtn = document.getElementById("deleteBtn");
-      const closeEditor = document.getElementById("closeEditor");
+    const titleDialog = document.getElementById("titleDialog");
+    const titleForm = document.getElementById("titleForm");
+    const titleInput = document.getElementById("titleInput");
+    const titleCancel = document.getElementById("titleCancel");
 
-      let activeSlot = null;
+    const editorDialog = document.getElementById("editorDialog");
+    const editorHeading = document.getElementById("editorHeading");
+    const bodyInput = document.getElementById("bodyInput");
+    const renameBtn = document.getElementById("renameBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const closeEditor = document.getElementById("closeEditor");
 
-      render();
-      setupPWA();
+    let activeSlot = null;
 
-      function load(){
-        try{
-          const raw = localStorage.getItem(KEY);
-          if(!raw) return { books: [] };
-          const parsed = JSON.parse(raw);
-          if(!parsed || !Array.isArray(parsed.books)) return { books: [] };
-          return parsed;
-        }catch{
-          return { books: [] };
-        }
+    render();
+    setupPWA();
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return { books: [] };
+        const parsed = JSON.parse(raw);
+        if(!parsed || !Array.isArray(parsed.books)) return { books: [] };
+        return parsed;
+      }catch{
+        return { books: [] };
       }
+    }
 
-      function save(){
-        localStorage.setItem(KEY, JSON.stringify(db));
+    function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+    function getBook(slot){ return db.books.find(b => b.slot === slot) || null; }
+
+    function upsertBook(slot, patch){
+      const now = new Date().toISOString();
+      const found = getBook(slot);
+      if(found){
+        Object.assign(found, patch, { updatedAt: now });
+      }else{
+        db.books.push({ slot, title:"", body:"", updatedAt: now, ...patch });
       }
+      save();
+    }
 
-      function getBook(slot){
-        return db.books.find(b => b.slot === slot) || null;
-      }
+    function removeBook(slot){
+      db.books = db.books.filter(b => b.slot !== slot);
+      save();
+    }
 
-      function upsertBook(slot, patch){
-        const now = new Date().toISOString();
-        const found = getBook(slot);
-        if(found){
-          Object.assign(found, patch, { updatedAt: now });
-        }else{
-          db.books.push({
-            slot,
-            title: "",
-            body: "",
-            updatedAt: now,
-            ...patch
-          });
-        }
-        save();
-      }
+    function render(){
+      row1.innerHTML = "";
+      row2.innerHTML = "";
 
-      function removeBook(slot){
-        db.books = db.books.filter(b => b.slot !== slot);
-        save();
-      }
-
-      function render(){
-        row1.innerHTML = "";
-        row2.innerHTML = "";
-
-        for(let slot=1; slot<=SLOT_COUNT; slot++){
-          const book = getBook(slot);
-          const hasTitle = !!(book && book.title && book.title.trim());
-
-          const btn = document.createElement("button");
-          btn.className = "book " + (hasTitle ? "filled" : "empty");
-          btn.type = "button";
-          btn.dataset.slot = String(slot);
-          btn.title = hasTitle ? book.title : "未設定";
-          btn.innerHTML = `<p class="book-title">${hasTitle ? escapeHtml(book.title) : "　"}</p>`;
-          btn.addEventListener("click", () => onBookTap(slot));
-
-          if(slot <= 5) row1.appendChild(btn);
-          else row2.appendChild(btn);
-        }
-      }
-
-      function onBookTap(slot){
-        activeSlot = slot;
+      for(let slot=1; slot<=SLOT_COUNT; slot++){
         const book = getBook(slot);
+        const hasTitle = !!(book && book.title && book.title.trim());
 
-        if(!book || !book.title || !book.title.trim()){
-          titleInput.value = book?.title ?? "";
-          titleDialog.showModal();
-          setTimeout(() => titleInput.focus(), 0);
-          return;
-        }
+        const btn = document.createElement("button");
+        btn.className = "book " + (hasTitle ? "filled" : "empty");
+        btn.type = "button";
+        btn.dataset.slot = String(slot);
+        btn.title = hasTitle ? book.title : "未設定";
+        btn.innerHTML = `<p class="book-title">${hasTitle ? escapeHtml(book.title) : "　"}</p>`;
+        btn.addEventListener("click", () => onBookTap(slot));
 
-        openEditor(slot);
+        if(slot <= 5) row1.appendChild(btn);
+        else row2.appendChild(btn);
       }
+    }
 
-      titleForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if(activeSlot == null) return;
+    function onBookTap(slot){
+      activeSlot = slot;
+      const book = getBook(slot);
 
-        const nextTitle = titleInput.value.trim();
-        const current = getBook(activeSlot) || { body: "" };
-        upsertBook(activeSlot, { title: nextTitle, body: current.body || "" });
-
-        titleDialog.close();
-        render();
-
-        editorHeading.textContent = nextTitle || `本 ${activeSlot}`;
-
-        if(nextTitle && !editorDialog.open){
-          openEditor(activeSlot);
-        }
-      });
-
-      titleCancel.addEventListener("click", () => {
-        titleDialog.close();
-      });
-
-      function openEditor(slot){
-        const book = getBook(slot) || { title:"", body:"" };
-        editorHeading.textContent = book.title || `本 ${slot}`;
-        bodyInput.value = book.body || "";
-        editorDialog.showModal();
-        setTimeout(() => bodyInput.focus(), 0);
-      }
-
-      bodyInput.addEventListener("input", () => {
-        if(activeSlot == null) return;
-        const book = getBook(activeSlot) || { title:"" };
-        upsertBook(activeSlot, { title: book.title || "", body: bodyInput.value });
-      });
-
-      renameBtn.addEventListener("click", () => {
-        if(activeSlot == null) return;
-        const book = getBook(activeSlot) || { title:"", body:"" };
-        titleInput.value = book.title || "";
+      if(!book || !book.title || !book.title.trim()){
+        titleInput.value = book?.title ?? "";
         titleDialog.showModal();
         setTimeout(() => titleInput.focus(), 0);
-      });
-
-      deleteBtn.addEventListener("click", () => {
-        if(activeSlot == null) return;
-        if(!confirm("この本を削除します。よろしいですか？")) return;
-        removeBook(activeSlot);
-        editorDialog.close();
-        render();
-      });
-
-      closeEditor.addEventListener("click", () => editorDialog.close());
-
-      function escapeHtml(str){
-        return String(str)
-          .replaceAll("&","&amp;")
-          .replaceAll("<","&lt;")
-          .replaceAll(">","&gt;")
-          .replaceAll('"',"&quot;")
-          .replaceAll("'","&#39;");
+        return;
       }
+      openEditor(slot);
+    }
 
-      function setupPWA(){
-        if("serviceWorker" in navigator){
-          navigator.serviceWorker.register("service-worker.js").catch(()=>{});
-        }
+    titleForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if(activeSlot == null) return;
+
+      const nextTitle = titleInput.value.trim();
+      const current = getBook(activeSlot) || { body: "" };
+      upsertBook(activeSlot, { title: nextTitle, body: current.body || "" });
+
+      titleDialog.close();
+      render();
+
+      editorHeading.textContent = nextTitle || `本 ${activeSlot}`;
+      if(nextTitle && !editorDialog.open) openEditor(activeSlot);
+    });
+
+    titleCancel.addEventListener("click", () => titleDialog.close());
+
+    function openEditor(slot){
+      const book = getBook(slot) || { title:"", body:"" };
+      editorHeading.textContent = book.title || `本 ${slot}`;
+      bodyInput.value = book.body || "";
+      editorDialog.showModal();
+      setTimeout(() => bodyInput.focus(), 0);
+    }
+
+    bodyInput.addEventListener("input", () => {
+      if(activeSlot == null) return;
+      const book = getBook(activeSlot) || { title:"" };
+      upsertBook(activeSlot, { title: book.title || "", body: bodyInput.value });
+    });
+
+    renameBtn.addEventListener("click", () => {
+      if(activeSlot == null) return;
+      const book = getBook(activeSlot) || { title:"", body:"" };
+      titleInput.value = book.title || "";
+      titleDialog.showModal();
+      setTimeout(() => titleInput.focus(), 0);
+    });
+
+    deleteBtn.addEventListener("click", () => {
+      if(activeSlot == null) return;
+      if(!confirm("この本を削除します。よろしいですか？")) return;
+      removeBook(activeSlot);
+      editorDialog.close();
+      render();
+    });
+
+    closeEditor.addEventListener("click", () => editorDialog.close());
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function setupPWA(){
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.register("service-worker.js").catch(()=>{});
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
