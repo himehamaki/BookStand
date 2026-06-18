@@ -8,10 +8,17 @@
   <title>BookStand</title>
   <style>
     :root{
-      --book-w: 38px;     /* ←本を戻す */
-      --book-h: 176px;    /* ←本を戻す */
-      --gap: 12px;        /* ←間隔少し広め */
+      --book-w: 36px;
+      --book-h: 176px;
+      --gap: 10px;
       --side-pad: 14px;
+      --wall-1:#ddd6cc;
+      --wall-2:#cfc6ba;
+      --wood-1:#a87650;
+      --wood-2:#8c5e3f;
+      --wood-3:#744c33;
+      --wood-dark:#5e3c29;
+      --ink:#2b3445;
     }
 
     *{ box-sizing:border-box; }
@@ -19,12 +26,16 @@
 
     body{
       font-family:
-        "Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",
-        system-ui,-apple-system,sans-serif;
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic UI",
+        "Noto Sans JP",
+        system-ui,
+        -apple-system,
+        sans-serif;
+      color:#2b2b2b;
       background:
         radial-gradient(1200px 500px at 50% -20%, rgba(255,255,255,.18), transparent 60%),
-        linear-gradient(180deg, #ddd6cc, #cfc6ba);
-      color:#2b2b2b;
+        linear-gradient(180deg, var(--wall-1), var(--wall-2));
     }
 
     .wrap{
@@ -37,12 +48,13 @@
     .title{ display:none; }
 
     .bookshelf{
-      width:min(94vw, 420px);   /* ←棚をちゃんと確保 */
+      width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
+      max-width: 92vw;
       padding:14px 12px 12px;
       border-radius:6px;
       position:relative;
-      background:linear-gradient(180deg, #a87650, #8c5e3f 52%, #744c33);
-      border:1px solid #5e3c29;
+      background:linear-gradient(180deg, var(--wood-1), var(--wood-2) 52%, var(--wood-3));
+      border:1px solid var(--wood-dark);
       box-shadow:
         0 10px 24px rgba(0,0,0,.30),
         inset 0 1px 0 rgba(255,255,255,.18),
@@ -56,13 +68,16 @@
       pointer-events:none;
       border-radius:6px;
       opacity:.22;
-      background:repeating-linear-gradient(
-        7deg,
-        rgba(255,255,255,.05) 0 2px,
-        rgba(0,0,0,.05) 2px 4px,
-        rgba(255,255,255,.02) 4px 7px
-      );
+      background:
+        repeating-linear-gradient(
+          7deg,
+          rgba(255,255,255,.05) 0 2px,
+          rgba(0,0,0,.05) 2px 4px,
+          rgba(255,255,255,.02) 4px 7px
+        );
     }
+
+    .bookshelf::after{ content:none; }
 
     .shelf-row{
       position:relative;
@@ -71,10 +86,10 @@
       border-radius:4px;
       background:linear-gradient(
         180deg,
-        rgba(0,0,0,.22) 0%,
+        rgba(0,0,0,.20) 0%,
         rgba(0,0,0,.10) 30%,
         rgba(255,255,255,.03) 56%,
-        rgba(0,0,0,.16) 100%
+        rgba(0,0,0,.14) 100%
       );
       box-shadow:
         inset 0 2px 5px rgba(0,0,0,.25),
@@ -90,11 +105,13 @@
       align-items:flex-end;
       gap:var(--gap);
       flex-wrap:nowrap;
+      overflow:hidden;
     }
 
     .book{
       width:var(--book-w);
       height:var(--book-h);
+      flex:0 0 auto;
       border:none;
       cursor:pointer;
       border-radius:4px;
@@ -106,6 +123,12 @@
         inset 0 1px 0 rgba(255,255,255,.58),
         0 0 0 1px rgba(0,0,0,.10),
         0 1px 0 rgba(0,0,0,.18);
+      transition:transform .08s ease, filter .12s ease;
+    }
+
+    .book:active{
+      transform:translateY(1px) scale(.995);
+      filter:brightness(.98);
     }
 
     .book.empty,
@@ -115,6 +138,8 @@
         linear-gradient(105deg, #fdfefe 0%, #eef2f7 52%, #e6ebf2 100%);
     }
 
+    .book.filled::after{ content:none; }
+
     .book-title{
       writing-mode:vertical-rl;
       text-orientation:mixed;
@@ -122,25 +147,36 @@
       margin:0 auto;
       overflow:hidden;
       text-align:center;
-      color:#2b3445;
+      color:var(--ink);
       font-size:11px;
       line-height:1.2;
       letter-spacing:.04em;
       user-select:none;
       text-shadow:0 1px 0 rgba(255,255,255,.55);
-      font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+      font-family:
+        "Hiragino Mincho ProN",
+        "Yu Mincho",
+        "Noto Serif JP",
+        serif;
     }
+
     .book.empty .book-title{ color:transparent; }
 
     .plank{
       position:absolute;
-      left:0; right:0; bottom:0;
+      left:0;
+      right:0;
+      bottom:0;
       height:13px;
       z-index:3;
       pointer-events:none;
       background:linear-gradient(180deg, #b07a52 0%, #925f40 58%, #784d34 100%);
       border-top:1px solid rgba(255,255,255,.22);
       border-bottom:1px solid rgba(0,0,0,.30);
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        inset 0 -1px 1px rgba(0,0,0,.18);
     }
 
     dialog{
@@ -151,10 +187,20 @@
       overflow:hidden;
       box-shadow:0 20px 60px rgba(0,0,0,.35);
     }
+
     dialog::backdrop{ background:rgba(0,0,0,.45); }
 
-    .modal{ background:#111827; color:#f9fafb; padding:18px; }
-    .modal h2{ margin:0 0 10px; font-size:1.02rem; }
+    .modal{
+      background:#111827;
+      color:#f9fafb;
+      padding:18px;
+    }
+
+    .modal h2{
+      margin:0 0 10px;
+      font-size:1.02rem;
+    }
+
     .field{ margin-bottom:12px; }
 
     input, textarea{
@@ -169,7 +215,16 @@
       line-height:1.5;
     }
 
-    textarea{ min-height:280px; resize:vertical; }
+    input:focus, textarea:focus{
+      outline:none;
+      border-color:#93c5fd;
+      box-shadow:0 0 0 3px rgba(147,197,253,.25);
+    }
+
+    textarea{
+      min-height:280px;
+      resize:vertical;
+    }
 
     .row{
       display:flex;
@@ -186,133 +241,10 @@
       cursor:pointer;
       font:inherit;
     }
+
     .btn.sub{ background:#374151; color:#fff; }
     .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
     .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
-    /* ===== 格調高い装飾（サイズは変えない） ===== */
-
-/* 本棚本体に上品な艶 */
-.bookshelf{
-  border-radius: 10px;
-  border: 1px solid #5a3927;
-  background:
-    linear-gradient(180deg, #b07a52 0%, #986742 45%, #7b5236 100%);
-  box-shadow:
-    0 12px 26px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 -1px 0 rgba(0,0,0,.22);
-}
-
-/* 金の額縁ライン（内側） */
-.bookshelf::after{
-  content:"";
-  position:absolute;
-  inset:7px;
-  border-radius:7px;
-  pointer-events:none;
-  border:1px solid rgba(224,190,115,.75);
-  box-shadow:
-    0 0 0 1px rgba(95,64,24,.22) inset,
-    0 0 10px rgba(224,190,115,.16);
-}
-
-/* 上部オーナメント */
-.bookshelf::before{
-  /* 既存の木目を残したまま重ねるため、背景を2層化 */
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:10px;
-  pointer-events:none;
-  background:
-    radial-gradient(120px 22px at 50% 6px, rgba(255,230,170,.22), transparent 70%),
-    repeating-linear-gradient(
-      7deg,
-      rgba(255,255,255,.045) 0 2px,
-      rgba(0,0,0,.04) 2px 4px,
-      rgba(255,255,255,.02) 4px 7px
-    );
-  opacity:.34;
-}
-
-/* 棚の中をもう少し奥行き深く */
-.shelf-row{
-  border-radius: 6px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.30) 0%,
-      rgba(0,0,0,.16) 28%,
-      rgba(255,255,255,.04) 56%,
-      rgba(0,0,0,.24) 100%
-    );
-  box-shadow:
-    inset 0 3px 7px rgba(0,0,0,.34),
-    inset 0 -2px 3px rgba(0,0,0,.24),
-    inset 0 1px 0 rgba(255,255,255,.06);
-}
-
-/* 棚板を重厚に（端から端まで） */
-.plank{
-  height: 14px;
-  background:
-    linear-gradient(180deg, #bf865a 0%, #9a6844 58%, #7e5439 100%);
-  border-top: 1px solid rgba(255,255,255,.24);
-  border-bottom: 1px solid rgba(0,0,0,.34);
-  box-shadow:
-    0 1px 2px rgba(0,0,0,.28),
-    inset 0 1px 0 rgba(255,255,255,.10),
-    inset 0 -1px 1px rgba(0,0,0,.20);
-}
-
-/* 本にも控えめ装飾（上品な背ラベル） */
-.book.filled{
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.46) 0 19%, transparent 19% 100%),
-    repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,.05) 0 1px,
-      rgba(0,0,0,.025) 1px 2px
-    ),
-    linear-gradient(105deg, #fffefe 0%, #f1f4f9 52%, #e8edf4 100%);
-}
-
-.book.filled::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:9px;
-  transform:translateX(-50%);
-  width:58%;
-  height:9px;
-  border-radius:999px;
-  background:linear-gradient(180deg, #f0d89a, #caa254 62%, #a47d36);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.58) inset,
-    0 1px 2px rgba(0,0,0,.18);
-}
-
-/* 文字の格調を少し上げる */
-.book-title{
-  font-size: 11px;
-  letter-spacing: .06em;
-  color:#2e2a3a;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,.62),
-    0 0 1px rgba(0,0,0,.08);
-}
-    /* サイズを最終固定（装飾CSSより後に置く） */
-.bookshelf{
-  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2)) !important;
-  max-width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2)) !important;
-}
-
-/* いまの推奨値 */
-:root{
-  --book-w: 36px;
-  --gap: 10px;
-  --side-pad: 14px;
-}
   </style>
 </head>
 <body>
@@ -361,6 +293,7 @@
   <script>
     const KEY = "bookstand_shelf_v2";
     const SLOT_COUNT = 10;
+
     let db = load();
 
     const row1 = document.getElementById("row1");
@@ -395,8 +328,13 @@
       }
     }
 
-    function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
-    function getBook(slot){ return db.books.find(b => b.slot === slot) || null; }
+    function save(){
+      localStorage.setItem(KEY, JSON.stringify(db));
+    }
+
+    function getBook(slot){
+      return db.books.find(b => b.slot === slot) || null;
+    }
 
     function upsertBook(slot, patch){
       const now = new Date().toISOString();
@@ -404,7 +342,13 @@
       if(found){
         Object.assign(found, patch, { updatedAt: now });
       }else{
-        db.books.push({ slot, title:"", body:"", updatedAt: now, ...patch });
+        db.books.push({
+          slot,
+          title: "",
+          body: "",
+          updatedAt: now,
+          ...patch
+        });
       }
       save();
     }
@@ -445,6 +389,7 @@
         setTimeout(() => titleInput.focus(), 0);
         return;
       }
+
       openEditor(slot);
     }
 
@@ -460,10 +405,15 @@
       render();
 
       editorHeading.textContent = nextTitle || `本 ${activeSlot}`;
-      if(nextTitle && !editorDialog.open) openEditor(activeSlot);
+
+      if(nextTitle && !editorDialog.open){
+        openEditor(activeSlot);
+      }
     });
 
-    titleCancel.addEventListener("click", () => titleDialog.close());
+    titleCancel.addEventListener("click", () => {
+      titleDialog.close();
+    });
 
     function openEditor(slot){
       const book = getBook(slot) || { title:"", body:"" };
