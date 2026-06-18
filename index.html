@@ -301,6 +301,18 @@
     0 1px 0 rgba(255,255,255,.62),
     0 0 1px rgba(0,0,0,.08);
 }
+    /* サイズを最終固定（装飾CSSより後に置く） */
+.bookshelf{
+  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2)) !important;
+  max-width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2)) !important;
+}
+
+/* いまの推奨値 */
+:root{
+  --book-w: 36px;
+  --gap: 10px;
+  --side-pad: 14px;
+}
   </style>
 </head>
 <body>
