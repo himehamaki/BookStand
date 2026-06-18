@@ -7,19 +7,11 @@
   <link rel="manifest" href="manifest.json" />
   <title>BookStand</title>
   <style>
-    :root{
-      --book-w: 36px;
-      --book-h: 176px;
-      --gap: 10px;
-      --side-pad: 14px;
-      --wall-1:#ddd6cc;
-      --wall-2:#cfc6ba;
-      --wood-1:#a87650;
-      --wood-2:#8c5e3f;
-      --wood-3:#744c33;
-      --wood-dark:#5e3c29;
-      --ink:#2b3445;
-    }
+:root{
+  --book-w: 36px;
+  --gap: 10px;
+  --side-pad: 14px;
+}
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; margin:0; }
@@ -47,19 +39,10 @@
 
     .title{ display:none; }
 
-    .bookshelf{
-      width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
-      max-width: 92vw;
-      padding:14px 12px 12px;
-      border-radius:6px;
-      position:relative;
-      background:linear-gradient(180deg, var(--wood-1), var(--wood-2) 52%, var(--wood-3));
-      border:1px solid var(--wood-dark);
-      box-shadow:
-        0 10px 24px rgba(0,0,0,.30),
-        inset 0 1px 0 rgba(255,255,255,.18),
-        inset 0 -1px 0 rgba(0,0,0,.20);
-    }
+.bookshelf{
+  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
+  max-width: none;
+}
 
     .bookshelf::before{
       content:"";
