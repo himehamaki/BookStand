@@ -455,6 +455,101 @@ body{
     linear-gradient(180deg, #a17058, #7b523f 68%, #644132);
   box-shadow: 0 1px 4px rgba(0,0,0,.18) inset;
 }
+      /* ===== 本棚だけリアル化 ===== */
+
+/* 本棚サイズは詰めたまま（5冊ジャスト基準） */
+.bookshelf{
+  --book-w: 32px;
+  --gap: 10px;
+  --side-pad: 10px;
+
+  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
+  max-width: 92vw;
+  padding: 12px 10px 10px;
+  border-radius: 6px;
+  position: relative;
+
+  /* 木のベース色 */
+  background:
+    linear-gradient(180deg, #7a533c 0%, #694632 45%, #5b3c2b 100%);
+  border: 1px solid #4a2f22;
+
+  /* フレームの重厚感 */
+  box-shadow:
+    0 14px 26px rgba(0,0,0,.35),
+    0 2px 0 rgba(255,255,255,.14) inset,
+    0 -2px 0 rgba(0,0,0,.18) inset;
+}
+
+/* 木目オーバーレイ */
+.bookshelf::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:6px;
+  pointer-events:none;
+  opacity:.45;
+  background:
+    repeating-linear-gradient(
+      8deg,
+      rgba(255,255,255,.06) 0 2px,
+      rgba(0,0,0,.05) 2px 4px,
+      rgba(255,255,255,.03) 4px 7px
+    );
+  mix-blend-mode: overlay;
+}
+
+/* 内側フレーム（額縁っぽい段差） */
+.bookshelf::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:3px;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.18) inset,
+    0 1px 0 rgba(255,255,255,.08);
+}
+
+/* 各段は透明にして“木枠”を見せる */
+.shelf-row{
+  padding: 8px var(--side-pad) 14px;
+  margin: 0 0 8px;
+  border-radius: 0;
+  background: transparent;
+}
+.shelf-row:last-child{ margin-bottom:0; }
+
+/* 棚板をリアル寄りに */
+.plank{
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  height: 11px;
+  border-radius: 2px;
+  pointer-events:none;
+  z-index:1;
+
+  background:
+    linear-gradient(180deg, #9b6a4a 0%, #7f543d 55%, #694632 100%);
+  border-top: 1px solid rgba(255,255,255,.22);
+  border-bottom: 1px solid rgba(0,0,0,.25);
+
+  box-shadow:
+    0 2px 3px rgba(0,0,0,.22),
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 -2px 2px rgba(0,0,0,.12) inset;
+}
+
+/* 本は現状維持（必要最低限だけ） */
+.book{
+  width: var(--book-w);
+}
+.book-list{
+  gap: var(--gap);
+  justify-content: center;
+}
     </style>
   </head>
   <body>
