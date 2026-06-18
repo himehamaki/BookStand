@@ -7,12 +7,19 @@
   <link rel="manifest" href="manifest.json" />
   <title>BookStand</title>
   <style>
-:root{
-  --book-w: 40px;
-  --book-h: 188px;
-  --gap: 10px;
-  --side-pad: 14px;
-}
+    :root{
+      --book-w: 40px;
+      --book-h: 188px;
+      --gap: 10px;
+      --side-pad: 14px;
+      --wall-1:#ddd6cc;
+      --wall-2:#cfc6ba;
+      --wood-1:#a87650;
+      --wood-2:#8c5e3f;
+      --wood-3:#744c33;
+      --wood-dark:#5e3c29;
+      --ink:#2b3445;
+    }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; margin:0; }
@@ -40,10 +47,20 @@
 
     .title{ display:none; }
 
-.bookshelf{
-  width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
-  max-width: none;
-}
+    .bookshelf{
+      width: calc((var(--book-w) * 5) + (var(--gap) * 4) + (var(--side-pad) * 2));
+      max-width: none;
+      padding:14px 12px 12px;
+      border-radius:6px;
+      position:relative;
+      background:linear-gradient(180deg, var(--wood-1), var(--wood-2) 52%, var(--wood-3));
+      border:1px solid var(--wood-dark);
+      box-shadow:
+        0 10px 24px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.18),
+        inset 0 -1px 0 rgba(0,0,0,.20);
+      overflow: visible;
+    }
 
     .bookshelf::before{
       content:"";
@@ -78,6 +95,7 @@
       box-shadow:
         inset 0 2px 5px rgba(0,0,0,.25),
         inset 0 -1px 2px rgba(0,0,0,.16);
+      overflow: visible;
     }
     .shelf-row:last-child{ margin-bottom:0; }
 
@@ -89,7 +107,7 @@
       align-items:flex-end;
       gap:var(--gap);
       flex-wrap:nowrap;
-      overflow:hidden;
+      overflow: visible;
     }
 
     .book{
@@ -164,7 +182,7 @@
     }
 
     dialog{
-      width:min(460px, 92vw);
+      width:min(520px, 94vw);
       border:none;
       border-radius:14px;
       padding:0;
@@ -229,6 +247,8 @@
     .btn.sub{ background:#374151; color:#fff; }
     .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
     .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+
+    #importFile{ display:none; }
   </style>
 </head>
 <body>
@@ -267,6 +287,9 @@
         <textarea id="bodyInput" placeholder="ここに本文を書いてください"></textarea>
       </div>
       <div class="row">
+        <button class="btn sub" type="button" id="exportBtn">エクスポート</button>
+        <button class="btn sub" type="button" id="importBtn">インポート</button>
+        <input id="importFile" type="file" accept="application/json" />
         <button class="btn sub" type="button" id="renameBtn">タイトル変更</button>
         <button class="btn danger" type="button" id="deleteBtn">この本を削除</button>
         <button class="btn sub" type="button" id="closeEditor">閉じる</button>
@@ -294,6 +317,9 @@
     const renameBtn = document.getElementById("renameBtn");
     const deleteBtn = document.getElementById("deleteBtn");
     const closeEditor = document.getElementById("closeEditor");
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+    const importFile = document.getElementById("importFile");
 
     let activeSlot = null;
 
@@ -346,7 +372,7 @@
       row1.innerHTML = "";
       row2.innerHTML = "";
 
-      for(let slot=1; slot<=SLOT_COUNT; slot++){
+      for(let slot = 1; slot <= SLOT_COUNT; slot++){
         const book = getBook(slot);
         const hasTitle = !!(book && book.title && book.title.trim());
 
@@ -400,7 +426,7 @@
     });
 
     function openEditor(slot){
-      const book = getBook(slot) || { title:"", body:"" };
+      const book = getBook(slot) || { title: "", body: "" };
       editorHeading.textContent = book.title || `本 ${slot}`;
       bodyInput.value = book.body || "";
       editorDialog.showModal();
@@ -409,13 +435,13 @@
 
     bodyInput.addEventListener("input", () => {
       if(activeSlot == null) return;
-      const book = getBook(activeSlot) || { title:"" };
+      const book = getBook(activeSlot) || { title: "" };
       upsertBook(activeSlot, { title: book.title || "", body: bodyInput.value });
     });
 
     renameBtn.addEventListener("click", () => {
       if(activeSlot == null) return;
-      const book = getBook(activeSlot) || { title:"", body:"" };
+      const book = getBook(activeSlot) || { title: "", body: "" };
       titleInput.value = book.title || "";
       titleDialog.showModal();
       setTimeout(() => titleInput.focus(), 0);
@@ -431,18 +457,76 @@
 
     closeEditor.addEventListener("click", () => editorDialog.close());
 
+    exportBtn.addEventListener("click", () => {
+      const payload = {
+        app: "BookStand",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: db
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      a.href = url;
+      a.download = `bookstand-backup-${y}${m}${day}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener("click", () => importFile.click());
+
+    importFile.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+
+      try{
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+
+        const incoming = parsed?.data?.books ? parsed.data : parsed;
+
+        if(!incoming || !Array.isArray(incoming.books)){
+          alert("JSON形式が正しくありません。");
+          return;
+        }
+
+        const books = incoming.books
+          .filter(b => Number.isInteger(b.slot) && b.slot >= 1 && b.slot <= SLOT_COUNT)
+          .map(b => ({
+            slot: b.slot,
+            title: typeof b.title === "string" ? b.title : "",
+            body: typeof b.body === "string" ? b.body : "",
+            updatedAt: typeof b.updatedAt === "string" ? b.updatedAt : new Date().toISOString()
+          }));
+
+        db = { books };
+        save();
+        render();
+        alert("インポート完了");
+      }catch{
+        alert("インポートに失敗しました。JSONファイルを確認してください。");
+      }finally{
+        importFile.value = "";
+      }
+    });
+
     function escapeHtml(str){
       return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     }
 
     function setupPWA(){
       if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
       }
     }
   </script>
