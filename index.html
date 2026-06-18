@@ -182,7 +182,7 @@
     }
 
     dialog{
-      width:min(520px, 94vw);
+      width:min(760px, 96vw);
       border:none;
       border-radius:14px;
       padding:0;
@@ -195,15 +195,15 @@
     .modal{
       background:#111827;
       color:#f9fafb;
-      padding:18px;
+      padding:14px;
     }
 
     .modal h2{
-      margin:0 0 10px;
+      margin:0 0 8px;
       font-size:1.02rem;
     }
 
-    .field{ margin-bottom:12px; }
+    .field{ margin-bottom:10px; }
 
     input, textarea{
       width:100%;
@@ -224,29 +224,36 @@
     }
 
     textarea{
-      min-height:280px;
+      min-height:62vh;
+      height:62vh;
+      max-height:70vh;
       resize:vertical;
     }
 
     .row{
       display:flex;
-      gap:8px;
       justify-content:flex-end;
+      align-items:center;
+      gap:8px;
       flex-wrap:wrap;
     }
 
     .btn{
       border:none;
       border-radius:12px;
-      min-height:42px;
-      padding:10px 14px;
+      min-height:38px;
+      padding:8px 12px;
       cursor:pointer;
       font:inherit;
     }
 
     .btn.sub{ background:#374151; color:#fff; }
     .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
-    .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+    .btn.danger{
+      background:#ef4444;
+      color:#fff;
+      margin-right:0;
+    }
 
     #importFile{ display:none; }
   </style>
