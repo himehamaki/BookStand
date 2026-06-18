@@ -183,6 +183,139 @@
         opacity:.7;
         margin:0 0 10px;
       }
+      /* ===== かわいいミニ本棚レイアウト ===== */
+
+/* 背景を落ち着かせる（左の派手グラデを弱める） */
+body{
+  background:
+    radial-gradient(700px 300px at 50% -10%, rgba(255,255,255,.08), transparent 60%),
+    linear-gradient(180deg, #6b4a34, #563726 55%, #452b1f);
+}
+
+/* 中央に小さく配置 */
+.wrap{
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  max-width: none;
+}
+
+/* タイトル非表示のまま */
+.title{ display:none; }
+
+/* 本棚本体を“箱”として小さめに */
+.bookshelf{
+  width: min(92vw, 420px);
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 12px 28px rgba(0,0,0,.25);
+}
+
+/* 段の余白を詰める */
+.shelf-row{
+  padding: 10px 12px 18px;
+  margin: 0 0 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  position: relative;
+  overflow: visible;
+}
+.shelf-row:last-child{ margin-bottom: 0; }
+
+/* 本を中央寄せで並べる */
+.book-list{
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+
+/* 本のサイズ（小さめで縦長） */
+.book{
+  width: 34px;
+  height: 148px;
+  flex: 0 0 auto;
+  border-radius: 8px 8px 4px 4px;
+  padding: 8px 4px 6px;
+}
+
+/* ←謎物体対策：疑似要素をいったん無効化 */
+.book::before,
+.book::after{
+  content: none !important;
+}
+
+.book.empty{
+  background: linear-gradient(90deg, #f2f4f7 0 22%, #fff 22% 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 1px 2px 0 rgba(0,0,0,.16);
+}
+.book.filled{
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.35) 0 22%, transparent 22% 100%),
+    linear-gradient(180deg, #f8fafc, #e6e9ee);
+  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 1px 2px 0 rgba(0,0,0,.16);
+}
+
+.book-title{
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+/* 棚板 */
+.plank{
+  z-index: 1;
+  pointer-events: none;
+  height: 9px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #8b5d3f, #6f4a33 65%, #5a3b2a);
+}
+
+/* ===== 入力欄を使いやすく ===== */
+.modal{
+  padding: 18px;
+}
+.modal h2{
+  font-size: 1.02rem;
+  margin-bottom: 10px;
+}
+.hint{
+  margin-bottom: 12px;
+}
+
+/* テキストボックスの視認性とタップしやすさUP */
+input, textarea{
+  background: #0f172a;
+  border: 1px solid #4b5563;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 16px; /* モバイル拡大防止 */
+  line-height: 1.5;
+}
+
+/* フォーカス時にわかりやすく */
+input:focus, textarea:focus{
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(147,197,253,.25);
+}
+
+/* 本文欄は少し高め */
+textarea{
+  min-height: 280px;
+}
+
+/* ボタンも押しやすく */
+.btn{
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
     </style>
   </head>
   <body>
