@@ -47,30 +47,27 @@
         backdrop-filter: blur(2px);
       }
 
-      .shelf-row{
-        position:relative;
-        margin:0 0 16px;
-        padding:16px 12px 22px;
-        border-radius:10px;
-        background:
-          linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      }
+/* 本と棚板の重なり順を明示 */
+.shelf-row{
+  position: relative;
+  overflow: visible;
+}
       .shelf-row:last-child{ margin-bottom:0; }
 
-      .plank{
-        position:absolute;
-        left:0; right:0; bottom:0;
-        height:12px;
-        border-radius:8px;
-        background: linear-gradient(180deg, #8b5d3f, #6f4a33 60%, #5a3b2a);
-        box-shadow: 0 3px 8px var(--shelf-shadow) inset, 0 4px 10px rgba(0,0,0,.18);
-      }
+/* 棚板は背面 + クリックを透過 */
+.plank{
+  z-index: 1;
+  pointer-events: none;
+}
 
-book-list{
-  display:flex;
-  gap:10px;
-  align-items:flex-end;
-  justify-content:flex-start;
+.book-list{
+  position: relative;
+  z-index: 2;            /* 本を前面に */
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  justify-content: center; /* 左寄りを解消 */
+  flex-wrap: nowrap;
 }
 
 .book{
