@@ -1,86 +1,434 @@
-/* 背表紙を本らしく */
-.book{
-  height: 176px;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  padding: 10px 7px 8px;
-  text-align: left;
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#5b3a29" />
+    <link rel="manifest" href="manifest.json" />
+    <title>BookStand</title>
+    <style>
+      :root{
+        --wood-1:#6f4a33;
+        --wood-2:#5b3a29;
+        --wood-3:#4b2f21;
+        --shelf-shadow: rgba(0,0,0,.22);
+        --book-text:#1f2937;
+      }
 
-  /* 角を少し丸く（上＞下） */
-  border-radius: 9px 9px 4px 4px;
+      *{ box-sizing:border-box; }
+      html,body{ height:100%; margin:0; }
+      body{
+        font-family: "Hiragino Kaku Gothic ProN","Yu Gothic UI",system-ui,-apple-system,sans-serif;
+        color:#f8fafc;
+        background:
+          radial-gradient(1200px 600px at 20% -10%, #7b5238 0%, transparent 60%),
+          linear-gradient(180deg, var(--wood-1), var(--wood-2) 45%, var(--wood-3));
+      }
 
-  /* 厚み感 */
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.45) inset,   /* 上のハイライト */
-    -6px 0 0 rgba(0,0,0,.07) inset,         /* 小口側の陰 */
-    -1px 0 0 rgba(255,255,255,.28) inset,   /* 背の光 */
-    2px 3px 0 rgba(0,0,0,.18),              /* 接地影 */
-    0 10px 10px -8px rgba(0,0,0,.35);       /* 落ち影 */
-  transition: transform .08s ease, filter .12s ease;
-}
-.book:active{
-  transform: translateY(1px) scale(.995);
-  filter: brightness(.98);
-}
+      .wrap{
+        max-width:1100px;
+        margin:0 auto;
+        padding:20px 14px 28px;
+      }
 
-/* 背の縫い目ライン（背表紙の帯） */
-.book::before{
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0; left: 0;
-  width: 16%;
-  border-radius: 9px 0 0 4px;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,.38),
-    rgba(255,255,255,.14) 45%,
-    rgba(0,0,0,.05)
-  );
-}
+      .title{
+        margin:0 0 14px;
+        font-size:clamp(1.1rem, 2.5vw, 1.5rem);
+        font-weight:700;
+        letter-spacing:.02em;
+        opacity:.95;
+      }
 
-/* 下端にページ感 */
-.book::after{
-  content: "";
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  bottom: 2px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255,255,255,.45);
-  opacity: .55;
-}
+      .bookshelf{
+        background: rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.15);
+        border-radius:14px;
+        padding:14px;
+        backdrop-filter: blur(2px);
+      }
 
-/* タイトルなし（白背） */
-.book.empty{
-  background:
-    linear-gradient(90deg, #f2f4f7 0 16%, #ffffff 16% 100%);
-}
+      .shelf-row{
+        position:relative;
+        margin:0 0 16px;
+        padding:16px 12px 22px;
+        border-radius:10px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      }
+      .shelf-row:last-child{ margin-bottom:0; }
 
-/* タイトルあり（やや紙色） */
-.book.filled{
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.32) 0 16%, transparent 16% 100%),
-    linear-gradient(180deg, #f9fafb, #e5e7eb 70%, #dfe3e8);
-}
+      .plank{
+        position:absolute;
+        left:0; right:0; bottom:0;
+        height:12px;
+        border-radius:8px;
+        background: linear-gradient(180deg, #8b5d3f, #6f4a33 60%, #5a3b2a);
+        box-shadow: 0 3px 8px var(--shelf-shadow) inset, 0 4px 10px rgba(0,0,0,.18);
+      }
 
-/* タイトル文字 */
-.book-title{
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  color: #111827;
-  font-size: 13px;
-  line-height: 1.25;
-  letter-spacing: .02em;
-  margin: 0;
-  user-select: none;
-  padding-right: 1px;
-}
+      .book-list{
+        display:grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap:10px;
+      }
 
-.book.empty .book-title{
-  color: transparent;
-}
+      .book{
+        height:176px;
+        border:none;
+        cursor:pointer;
+        position:relative;
+        padding:10px 7px 8px;
+        text-align:left;
+        border-radius:9px 9px 4px 4px;
+        box-shadow:
+          0 1px 0 rgba(255,255,255,.45) inset,
+          -6px 0 0 rgba(0,0,0,.07) inset,
+          -1px 0 0 rgba(255,255,255,.28) inset,
+          2px 3px 0 rgba(0,0,0,.18),
+          0 10px 10px -8px rgba(0,0,0,.35);
+        transition: transform .08s ease, filter .12s ease;
+      }
+      .book:active{
+        transform: translateY(1px) scale(.995);
+        filter: brightness(.98);
+      }
+      .book::before{
+        content:"";
+        position:absolute;
+        top:0; bottom:0; left:0;
+        width:16%;
+        border-radius:9px 0 0 4px;
+        background: linear-gradient(
+          180deg,
+          rgba(255,255,255,.38),
+          rgba(255,255,255,.14) 45%,
+          rgba(0,0,0,.05)
+        );
+      }
+      .book::after{
+        content:"";
+        position:absolute;
+        left:10%;
+        right:10%;
+        bottom:2px;
+        height:4px;
+        border-radius:2px;
+        background: rgba(255,255,255,.45);
+        opacity:.55;
+      }
+
+      .book.empty{
+        background: linear-gradient(90deg, #f2f4f7 0 16%, #ffffff 16% 100%);
+      }
+      .book.filled{
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.32) 0 16%, transparent 16% 100%),
+          linear-gradient(180deg, #f9fafb, #e5e7eb 70%, #dfe3e8);
+      }
+
+      .book-title{
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        height:100%;
+        width:100%;
+        overflow:hidden;
+        color:var(--book-text);
+        font-size:13px;
+        line-height:1.25;
+        letter-spacing:.02em;
+        margin:0;
+        user-select:none;
+        padding-right:1px;
+      }
+      .book.empty .book-title{ color:transparent; }
+
+      dialog{
+        width:min(460px, 92vw);
+        border:none;
+        border-radius:14px;
+        padding:0;
+        overflow:hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      }
+      dialog::backdrop{ background: rgba(0,0,0,.45); }
+
+      .modal{
+        background:#111827;
+        color:#f9fafb;
+        padding:16px;
+      }
+      .modal h2{
+        margin:0 0 12px;
+        font-size:1rem;
+      }
+      .field{ margin-bottom:12px; }
+
+      input, textarea{
+        width:100%;
+        border:1px solid #374151;
+        border-radius:10px;
+        background:#0b1220;
+        color:#f9fafb;
+        padding:10px 12px;
+        font:inherit;
+      }
+      textarea{
+        min-height:220px;
+        resize:vertical;
+      }
+
+      .row{
+        display:flex;
+        gap:8px;
+        justify-content:flex-end;
+        flex-wrap:wrap;
+      }
+
+      .btn{
+        border:none;
+        border-radius:10px;
+        padding:9px 12px;
+        cursor:pointer;
+        font:inherit;
+      }
+      .btn.sub{ background:#374151; color:#fff; }
+      .btn.main{ background:#60a5fa; color:#0b1220; font-weight:700; }
+      .btn.danger{ background:#ef4444; color:#fff; margin-right:auto; }
+
+      .hint{
+        font-size:.82rem;
+        opacity:.7;
+        margin:0 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1 class="title">本棚</h1>
+
+      <section class="bookshelf">
+        <div class="shelf-row">
+          <div id="row1" class="book-list"></div>
+          <div class="plank"></div>
+        </div>
+        <div class="shelf-row">
+          <div id="row2" class="book-list"></div>
+          <div class="plank"></div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="titleDialog">
+      <form method="dialog" class="modal" id="titleForm">
+        <h2>本のタイトル</h2>
+        <p class="hint">未入力なら白い背表紙のままです。</p>
+        <div class="field">
+          <input id="titleInput" maxlength="60" placeholder="タイトルを入力" />
+        </div>
+        <div class="row">
+          <button class="btn sub" value="cancel" type="button" id="titleCancel">キャンセル</button>
+          <button class="btn main" value="default" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="editorDialog">
+      <div class="modal">
+        <h2 id="editorHeading">本文</h2>
+        <p class="hint">この端末のブラウザに自動保存されます。</p>
+        <div class="field">
+          <textarea id="bodyInput" placeholder="ここに本文を書いてください"></textarea>
+        </div>
+        <div class="row">
+          <button class="btn sub" type="button" id="renameBtn">タイトル変更</button>
+          <button class="btn danger" type="button" id="deleteBtn">この本を削除</button>
+          <button class="btn sub" type="button" id="closeEditor">閉じる</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+      const KEY = "bookstand_shelf_v2";
+      const SLOT_COUNT = 10;
+
+      let db = load();
+
+      const row1 = document.getElementById("row1");
+      const row2 = document.getElementById("row2");
+
+      const titleDialog = document.getElementById("titleDialog");
+      const titleForm = document.getElementById("titleForm");
+      const titleInput = document.getElementById("titleInput");
+      const titleCancel = document.getElementById("titleCancel");
+
+      const editorDialog = document.getElementById("editorDialog");
+      const editorHeading = document.getElementById("editorHeading");
+      const bodyInput = document.getElementById("bodyInput");
+      const renameBtn = document.getElementById("renameBtn");
+      const deleteBtn = document.getElementById("deleteBtn");
+      const closeEditor = document.getElementById("closeEditor");
+
+      let activeSlot = null;
+      let renameAfterCloseEditor = false;
+
+      render();
+      setupPWA();
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(KEY);
+          if(!raw) return { books: [] };
+          const parsed = JSON.parse(raw);
+          if(!parsed || !Array.isArray(parsed.books)) return { books: [] };
+          return parsed;
+        }catch{
+          return { books: [] };
+        }
+      }
+
+      function save(){
+        localStorage.setItem(KEY, JSON.stringify(db));
+      }
+
+      function getBook(slot){
+        return db.books.find(b => b.slot === slot) || null;
+      }
+
+      function upsertBook(slot, patch){
+        const now = new Date().toISOString();
+        const found = getBook(slot);
+        if(found){
+          Object.assign(found, patch, { updatedAt: now });
+        }else{
+          db.books.push({
+            slot,
+            title: "",
+            body: "",
+            updatedAt: now,
+            ...patch
+          });
+        }
+        save();
+      }
+
+      function removeBook(slot){
+        db.books = db.books.filter(b => b.slot !== slot);
+        save();
+      }
+
+      function render(){
+        row1.innerHTML = "";
+        row2.innerHTML = "";
+
+        for(let slot=1; slot<=SLOT_COUNT; slot++){
+          const book = getBook(slot);
+          const hasTitle = !!(book && book.title && book.title.trim());
+
+          const btn = document.createElement("button");
+          btn.className = "book " + (hasTitle ? "filled" : "empty");
+          btn.type = "button";
+          btn.dataset.slot = String(slot);
+          btn.title = hasTitle ? book.title : "未設定";
+          btn.innerHTML = `<p class="book-title">${hasTitle ? escapeHtml(book.title) : "　"}</p>`;
+          btn.addEventListener("click", () => onBookTap(slot));
+
+          if(slot <= 5) row1.appendChild(btn);
+          else row2.appendChild(btn);
+        }
+      }
+
+      function onBookTap(slot){
+        activeSlot = slot;
+        const book = getBook(slot);
+
+        if(!book || !book.title || !book.title.trim()){
+          titleInput.value = book?.title ?? "";
+          titleDialog.showModal();
+          setTimeout(() => titleInput.focus(), 0);
+          return;
+        }
+
+        openEditor(slot);
+      }
+
+      titleForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if(activeSlot == null) return;
+
+        const nextTitle = titleInput.value.trim();
+        const current = getBook(activeSlot) || { body: "" };
+        upsertBook(activeSlot, { title: nextTitle, body: current.body || "" });
+
+        titleDialog.close();
+        render();
+
+        editorHeading.textContent = nextTitle || `本 ${activeSlot}`;
+
+        if(nextTitle && !editorDialog.open){
+          openEditor(activeSlot);
+        }
+      });
+
+      titleCancel.addEventListener("click", () => {
+        titleDialog.close();
+      });
+
+      function openEditor(slot){
+        const book = getBook(slot) || { title:"", body:"" };
+        editorHeading.textContent = book.title || `本 ${slot}`;
+        bodyInput.value = book.body || "";
+        editorDialog.showModal();
+        setTimeout(() => bodyInput.focus(), 0);
+      }
+
+      bodyInput.addEventListener("input", () => {
+        if(activeSlot == null) return;
+        const book = getBook(activeSlot) || { title:"" };
+        upsertBook(activeSlot, { title: book.title || "", body: bodyInput.value });
+      });
+
+      renameBtn.addEventListener("click", () => {
+        if(activeSlot == null) return;
+        const book = getBook(activeSlot) || { title:"", body:"" };
+
+        renameAfterCloseEditor = true;
+        editorDialog.close();
+
+        titleInput.value = book.title || "";
+        titleDialog.showModal();
+        setTimeout(() => titleInput.focus(), 0);
+      });
+
+      deleteBtn.addEventListener("click", () => {
+        if(activeSlot == null) return;
+        if(!confirm("この本を削除します。よろしいですか？")) return;
+        removeBook(activeSlot);
+        editorDialog.close();
+        render();
+      });
+
+      closeEditor.addEventListener("click", () => editorDialog.close());
+
+      editorDialog.addEventListener("close", () => {
+        if(renameAfterCloseEditor){
+          renameAfterCloseEditor = false;
+        }
+      });
+
+      function escapeHtml(str){
+        return String(str)
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#39;");
+      }
+
+      function setupPWA(){
+        if("serviceWorker" in navigator){
+          navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+        }
+      }
+    </script>
+  </body>
+</html>
