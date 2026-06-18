@@ -1,0 +1,11 @@
+{
+  "name": "BookStand",
+  "short_name": "BookStand",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#111827",
+  "lang": "ja",
+  "description": "10冊固定の本棚で管理するシンプル執筆アプリ",
+  "icons": []
+}
